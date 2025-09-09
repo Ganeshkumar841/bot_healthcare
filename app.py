@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
 
-# Set up API key
-API_KEY = "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"  # Replace with your actual Gemini API key
+
+API_KEY = "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"  
 genai.configure(api_key=API_KEY)
 
 HEALTH_KEYWORDS = [
@@ -28,7 +28,7 @@ def get_health_response(question):
         if not is_health_related(question):
             return "I can only answer health-related questions. Please ask about health."
 
-        model = genai.GenerativeModel("gemini-1.5-pro")
+        model = genai.GenerativeModel("gemini-1.5-flash")
 
         response = model.generate_content(question)
         
