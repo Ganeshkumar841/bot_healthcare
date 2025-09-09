@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Health Advisor - Gemini AI</title>
+    <title>ArogyaMitra AI - Gemini AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -51,7 +51,7 @@
         <header class="py-6 text-center">
             <div class="flex items-center justify-center gap-4 relative">
                 <h1 id="ui-title" class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
-                    Health Advisor AI
+                    ArogyaMitra AI
                 </h1>
                 <div class="absolute right-0">
                     <select id="language-selector" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 p-2">
@@ -72,7 +72,7 @@
         <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6">
             <div class="bot-message flex items-start gap-3">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 L 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                 </div>
                 <div id="ui-welcome" class="prose prose-invert max-w-none bg-gray-800/50 rounded-lg p-4 rounded-tl-none">
                     <p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>
@@ -100,7 +100,7 @@
 
         const uiStrings = {
             en: {
-                title: "Health Advisor AI",
+                title: "ArogyaMitra AI",
                 subtitle: "Your friendly AI-powered health resource",
                 welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>",
                 placeholder: "Ask about a health topic..."
@@ -112,7 +112,7 @@
                 placeholder: "Pregunta sobre un tema de salud..."
             },
             hi: {
-                title: "स्वास्थ्य सलाहकार AI",
+                title: "आरोग्यमित्र AI",
                 subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन",
                 welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>",
                 placeholder: "स्वास्थ्य विषय के बारे में पूछें..."
@@ -130,19 +130,19 @@
                 placeholder: "Fragen Sie nach einem Gesundheitsthema..."
             },
             te: {
-                title: "ఆరోగ్య సలహాదారు AI",
+                title: "ఆరోగ్యమిత్ర AI",
                 subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు",
                 welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>",
                 placeholder: "ఆరోగ్య అంశం గురించి అడగండి..."
             },
             ta: {
-                title: "சுகாதார ஆலோசகர் AI",
+                title: "ஆரோக்கியமித்ரா AI",
                 subtitle: "உங்கள் நட்பு AI- శక్తితో పనిచేసే சுகாதார வளம்",
                 welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>",
                 placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..."
             },
             or: {
-                title: "ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା AI",
+                title: "ଆରୋଗ୍ୟମିତ୍ର AI",
                 subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |",
                 welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>",
                 placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..."
