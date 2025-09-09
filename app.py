@@ -11,7 +11,9 @@ except ImportError:
     GENAI_AVAILABLE = False
 
 # --- Configuration ---
-API_KEY = os.getenv("API_KEY", "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4")
+# IMPORTANT: It's better practice to use environment variables for API keys.
+# I'm leaving your hardcoded key here as it was in your original file, but be aware of this.
+API_KEY =  "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"
 if GENAI_AVAILABLE and API_KEY != "YOUR_API_KEY_HERE":
     genai.configure(api_key=API_KEY)
 else:
@@ -42,8 +44,6 @@ except Exception as e:
     faiss_index = None
 
 # --- Specialized Knowledge & Language ---
-
-# THIS IS THE MISSING PIECE THAT HAS BEEN ADDED BACK
 LANGUAGE_MAP = {
     "en": "English",
     "es": "Spanish",
@@ -117,11 +117,14 @@ def find_best_chunks(question, index, chunks, top_k=3):
         print(f"Error during FAISS search: {e}")
         return []
 
-def get_health_response(question, language_code="en"):
-    if not GENAI_AVAILABLE: return "The AI health assistant is currently unavailable."
+# --- UPDATED FUNCTION WITH CONVERSATIONAL CONTEXT ---
+def get_health_response(question, language_code="en", history=[]): # Added history parameter
+    if not GENAI_AVAILABLE:
+        return "The AI health assistant is currently unavailable."
 
-    # PRIORITY 1: Check for vaccine-related questions
+    # PRIORITY 1: Check for vaccine-related questions (applies to the current question only)
     if is_vaccine_question(question):
+        # We don't need history for a direct, factual lookup like this.
         return get_vaccine_response(language_code)
 
     # PRIORITY 2: Use the book for general health queries
@@ -129,29 +132,43 @@ def get_health_response(question, language_code="en"):
     context_from_book = find_best_chunks(question, faiss_index, text_chunks)
     context_str = "\n".join(context_from_book)
 
-    prompt = f"""
-        You are an AI Health Advisor. Your role is to provide helpful, safe, and informative content based primarily on the provided context from a medical encyclopedia.
-        You are not a doctor. Your entire response, including the disclaimer, MUST be in {language_name}.
+    # The system prompt is now separate to define the AI's core behavior and handle follow-ups.
+    system_prompt = f"""
+        You are an AI Health Advisor. Your persona is supportive, knowledgeable, and cautious. Your role is to provide helpful, safe, and informative content based primarily on the provided context from a medical encyclopedia.
+        Your entire response, including all sections and disclaimers, MUST be in {language_name}.
+        Your tone must be concise, clear, supportive, and never rude or demotivating.
 
-        **Context from Medical Encyclopedia:**
+        When a user provides a vague follow-up like "ok proceed" or "tell me more", you MUST ask for clarification based on the conversational history. For example, if your previous response was a list of points, ask "Which point would you like me to elaborate on?". Do not generate a new, generic health response.
+
+        **Context from Medical Encyclopedia for the CURRENT question:**
         ---
-        {context_str if context_str else "No specific context was found in the book for this query. Answer based on your general knowledge but be cautious."}
+        {context_str if context_str else "No specific context was found in the book for this query. Answer based on your general knowledge but be extremely cautious and prioritize safety."}
         ---
 
-        **User's Question:** "{question}"
+        **RESPONSE STRUCTURE AND INSTRUCTIONS (for new health queries):**
+        If the user is asking a new health question (not a follow-up), you MUST structure your response as follows:
 
-        **Instructions:**
-        1.  Start your response with a disclaimer in {language_name}. The disclaimer must say: "**Disclaimer: I am an AI assistant and not a medical professional. This information is for educational purposes only. Please consult with a qualified healthcare provider for any health concerns or before making any decisions related to your health.**"
-        2.  After the disclaimer, answer the user's question using the 'Context from Medical Encyclopedia'.
-        3.  If the context is not relevant, use your general knowledge but state that specific information was not found in the reference material and strongly recommend consulting a healthcare professional.
+        1.  **Mandatory Disclaimer (Start with this):** Begin your response with the following disclaimer, exactly as written: "**Disclaimer: I am an AI assistant and not a medical professional. This information is for educational purposes only. Please consult with a qualified healthcare provider for any health concerns or before making any decisions related to your health.**"
+        2.  **Direct Answer:** Directly answer the user's question based on the provided 'Context from Medical Encyclopedia'.
+        3.  **Structured Advice Sections:** Provide these sections using Markdown:
+            * **Key Precautions:** List 2-3 important precautions.
+            * **Dietary Suggestions:** Briefly mention "Foods to Include" and "Foods to Limit".
+            * **When to Consult a Doctor:** State specific symptoms for when to see a doctor and suggest specialist types if applicable.
+        4.  **Medication Information (Conditional & Extremely Cautious):** ONLY for minor ailments, mention common over-the-counter medication, preceded by this EXACT warning: "**Medical Advisory: The following is for informational purposes ONLY, in a scenario where a doctor is not immediately accessible. Self-medication is risky and should be avoided. Always consult a healthcare professional before taking any medication.**"
+        5.  **Closing:** Conclude your response by asking an engaging, supportive question, like: "Would you like to know more about any of these points?"
     """
     try:
-        model = genai.GenerativeModel(GENERATIVE_MODEL)
-        response = model.generate_content(prompt)
+        model = genai.GenerativeModel(
+            GENERATIVE_MODEL,
+            system_instruction=system_prompt
+        )
+        chat = model.start_chat(history=history)
+        response = chat.send_message(question) # Send only the new question
         return response.text if hasattr(response, 'text') and response.text else "I couldn't generate a response."
     except Exception as e:
         print(f"An error occurred during content generation: {e}")
         return "An error occurred while trying to get a response."
+
 
 # --- Flask Routes ---
 app = Flask(__name__)
@@ -165,11 +182,13 @@ def ask():
     data = request.get_json()
     user_question = data.get("question")
     language = data.get("language", "en")
+    history = data.get("history", []) # Get history from request
     
     if not user_question:
         return jsonify({"error": "No question provided"}), 400
     
-    answer = get_health_response(user_question, language)
+    # Pass history to the function
+    answer = get_health_response(user_question, language, history)
     return jsonify({"answer": answer})
 
 if __name__ == "__main__":

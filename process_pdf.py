@@ -1,125 +1,118 @@
 import os
-import fitz  # PyMuPDF
-import numpy as np
+import re
 import faiss
-import google.generativeai as genai
+import numpy as np
+import pdfplumber  # You'll need to install this: pip install pdfplumber
+
+try:
+    import google.generativeai as genai
+    GENAI_AVAILABLE = True
+except ImportError:
+    GENAI_AVAILABLE = False
 
 # --- Configuration ---
-# IMPORTANT: Use the same API key as your main app.
-API_KEY = os.getenv("API_KEY", "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4")
-genai.configure(api_key=API_KEY)
+# Make sure your API_KEY is set as an environment variable or replace the string below.
+API_KEY = "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"
+if GENAI_AVAILABLE and API_KEY != "YOUR_API_KEY_HERE":
+    genai.configure(api_key=API_KEY)
+else:
+    GENAI_AVAILABLE = False
+    print("Warning: API_KEY is not set or google.generativeai is not installed. This script cannot run.")
+    exit()
 
-# --- IMPORTANT ---
-# This line has been updated to use your uploaded encyclopedia.
-PDF_FILE_PATH = "The-Gale-Encyclopedia-of-Medicine-3rd-Edition.pdf" 
-FAISS_INDEX_PATH = "health_book.index"
-TEXT_CHUNKS_PATH = "health_book_chunks.txt"
-
-# This is the model you'll use for creating embeddings.
+# Model for creating embeddings
 EMBEDDING_MODEL = "models/text-embedding-004"
 
-# --- Functions ---
+# --- File Paths ---
+PDF_PATH = "The Encyclopedia O fNatural Medicine.pdf"
+FAISS_INDEX_PATH = "natural_medicine.index"
+TEXT_CHUNKS_PATH = "natural_medicine_chunks.txt"
+EMBEDDING_DIMENSION = 768 # Dimension for text-embedding-004
 
 def extract_text_from_pdf(pdf_path):
-    """Opens a PDF and extracts its text content."""
+    """Extracts text from a PDF file, preserving paragraphs."""
     if not os.path.exists(pdf_path):
-        raise FileNotFoundError(f"The file {pdf_path} was not found.")
-    print(f"Reading text from {pdf_path}...")
-    text = ""
-    try:
-        doc = fitz.open(pdf_path)
-        for page in doc:
-            text += page.get_text()
-        doc.close()
-    except Exception as e:
-        print(f"An error occurred while trying to read the PDF: {e}")
-        print("This often means the PDF file is corrupted or in an incompatible format.")
+        print(f"Error: PDF file not found at '{pdf_path}'")
         return None
-
+    print(f"Starting text extraction from '{pdf_path}'...")
+    full_text = ""
+    with pdfplumber.open(pdf_path) as pdf:
+        total_pages = len(pdf.pages)
+        for i, page in enumerate(pdf.pages):
+            print(f"  - Processing page {i+1}/{total_pages}")
+            full_text += page.extract_text() + "\n"
     print("Text extraction complete.")
-    return text
+    return full_text
 
-def split_text_into_chunks(text, chunk_size=1000, overlap=100):
-    """Splits a long text into smaller, overlapping chunks."""
-    print("Splitting text into chunks...")
+def chunk_text(text, chunk_size=1200, overlap=100):
+    """Splits text into overlapping chunks based on paragraphs."""
+    print("Chunking text...")
+    # Clean up excessive newlines and spaces
+    text = re.sub(r'\s*\n\s*', '\n', text).strip()
+    paragraphs = [p.strip() for p in text.split('\n') if len(p.strip()) > 10]
+
     chunks = []
-    start = 0
-    while start < len(text):
-        end = start + chunk_size
-        chunks.append(text[start:end])
-        start += chunk_size - overlap
-    print(f"Created {len(chunks)} chunks.")
+    current_chunk = ""
+    for p in paragraphs:
+        if len(current_chunk) + len(p) + 1 < chunk_size:
+            current_chunk += p + "\n"
+        else:
+            chunks.append(current_chunk.strip())
+            current_chunk = p[-overlap:] + "\n" # Start next chunk with overlap
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    print(f"Created {len(chunks)} text chunks.")
     return chunks
 
-def save_chunks_to_file(chunks, file_path):
-    """Saves the text chunks to a file for later retrieval."""
-    print(f"Saving text chunks to {file_path}...")
-    with open(file_path, "w", encoding="utf-8") as f:
-        for chunk in chunks:
-            f.write(chunk.replace("\n", " ") + "\n---\n")
-    print("Chunks saved.")
+def create_embeddings(chunks):
+    """Creates embeddings for a list of text chunks using the Gemini API."""
+    print("Creating embeddings for text chunks...")
+    embeddings = []
+    total_chunks = len(chunks)
+    for i, chunk in enumerate(chunks):
+        print(f"  - Embedding chunk {i+1}/{total_chunks}")
+        try:
+            result = genai.embed_content(model=EMBEDDING_MODEL, content=chunk, task_type="RETRIEVAL_DOCUMENT")
+            embeddings.append(result['embedding'])
+        except Exception as e:
+            print(f"Error creating embedding for chunk {i+1}: {e}")
+            # Add a zero vector as a placeholder to avoid breaking the index
+            embeddings.append([0.0] * EMBEDDING_DIMENSION)
+            
+    print("Embedding creation complete.")
+    return np.array(embeddings).astype('float32')
 
-def create_faiss_index(chunks):
-    """Creates a FAISS index from text chunks using Gemini embeddings."""
-    print("Generating embeddings for chunks. This may take a while...")
-    try:
-        # Generate embeddings for all chunks. The API handles batching automatically.
-        result = genai.embed_content(
-            model=EMBEDDING_MODEL,
-            content=chunks,
-            task_type="RETRIEVAL_DOCUMENT"
-        )
-        embeddings = result['embedding']
-        
-        # Ensure all embeddings are NumPy arrays of the same float type
-        embeddings = np.array(embeddings).astype('float32')
+def main():
+    """Main function to process the PDF and create RAG files."""
+    if not GENAI_AVAILABLE:
+        return
 
-        # Create a FAISS index
-        dimension = len(embeddings[0])
-        index = faiss.IndexFlatL2(dimension)
-        index.add(embeddings)
-        
-        print(f"FAISS index created with {index.ntotal} vectors.")
-        return index
+    # 1. Extract text from the PDF
+    book_text = extract_text_from_pdf(PDF_PATH)
+    if not book_text:
+        return
 
-    except Exception as e:
-        print(f"An error occurred during embedding generation or FAISS indexing: {e}")
-        return None
+    # 2. Chunk the text
+    text_chunks = chunk_text(book_text)
 
-# --- Main Execution ---
+    # 3. Create embeddings for each chunk
+    embeddings = create_embeddings(text_chunks)
+
+    # 4. Create and save the FAISS index
+    print("Creating FAISS index...")
+    index = faiss.IndexFlatL2(EMBEDDING_DIMENSION)
+    index.add(embeddings)
+    faiss.write_index(index, FAISS_INDEX_PATH)
+    print(f"FAISS index saved to '{FAISS_INDEX_PATH}'")
+
+    # 5. Save the text chunks
+    print("Saving text chunks...")
+    with open(TEXT_CHUNKS_PATH, "w", encoding="utf-8") as f:
+        f.write("\n---\n".join(text_chunks))
+    print(f"Text chunks saved to '{TEXT_CHUNKS_PATH}'")
+
+    print("\nProcessing complete! Your chatbot is ready to be updated.")
+
 if __name__ == "__main__":
-    try:
-        # 1. Extract text from the PDF
-        book_text = extract_text_from_pdf(PDF_FILE_PATH)
-        
-        # Check if text extraction was successful
-        if not book_text or not book_text.strip():
-            print("\nSetup failed: No text could be extracted from the PDF.")
-            print("The PDF file may be corrupted, image-based, or password-protected.")
-            exit() # Stop the script here
-
-        # 2. Split the text into chunks
-        text_chunks = split_text_into_chunks(book_text)
-        
-        if not text_chunks:
-            print("\nSetup failed: Text was extracted, but no chunks could be created.")
-            exit()
-
-        # 3. Save chunks for reference (optional but good for debugging)
-        save_chunks_to_file(text_chunks, TEXT_CHUNKS_PATH)
-        
-        # 4. Create and save the FAISS index
-        faiss_index = create_faiss_index(text_chunks)
-        if faiss_index:
-            faiss.write_index(faiss_index, FAISS_INDEX_PATH)
-            print(f"FAISS index successfully saved to {FAISS_INDEX_PATH}")
-            print("\nSetup complete! You can now run the main app.py.")
-        else:
-            print("\nSetup failed. Please check the error messages above.")
-
-    except FileNotFoundError as e:
-        print(e)
-        print("Please make sure your PDF file is in the same directory and the PDF_FILE_PATH is correct.")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
+    main()
