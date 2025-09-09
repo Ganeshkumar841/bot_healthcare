@@ -4,190 +4,270 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Health Advisor - Gemini AI</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-       
         body {
-            background-color: #F7F9FC; 
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
-
-        .chat-container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #FFFFFF; 
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        #chat-box::-webkit-scrollbar {
+            width: 6px;
         }
-
-        .chat-box {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-            background: #FFFFFF; 
-            display: flex;
-            flex-direction: column;
+        #chat-box::-webkit-scrollbar-track {
+            background: transparent;
         }
-
-        .user-message {
-            background: #4A90E2; 
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px 10px 0 10px;
-            margin-bottom: 10px;
-            max-width: 70%;
-            align-self: flex-end;
-            font-family: 'Arial', sans-serif;
+        #chat-box::-webkit-scrollbar-thumb {
+            background-color: rgba(156, 163, 175, 0.4);
+            border-radius: 20px;
+            border: 3px solid transparent;
         }
-
-        .bot-message {
-            background: #E9F5E9; 
-            color: #2D3748; 
-            padding: 10px 15px;
-            border-radius: 10px 10px 10px 0;
-            margin-bottom: 10px;
-            max-width: 70%;
-            align-self: flex-start;
-            font-family: 'Georgia', serif;
-            position: relative;
+        .prose p {
+            margin-bottom: 0.75rem;
         }
-
-        /* .bot-message::before {
-            content: "🤖";
-            position: absolute;
-            left: -10px;
-            top: 0;
-            font-size: 1.5rem;
-        } */
-
-        .bot-response {
-            font-weight: bold;
-            color: #2C7A7B; 
+        .prose ul, .prose ol {
+            margin-left: 1.25rem;
+            margin-bottom: 0.75rem;
         }
-
-        .bot-response-normal {
-            font-weight: normal;
-            color: #2D3748; 
+        .prose li {
+            margin-bottom: 0.25rem;
         }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
         }
-
-        #user-input {
-            flex: 1;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-            padding: 10px;
-            font-family: 'Arial', sans-serif;
+        .dot {
+            animation: bounce 1.4s infinite ease-in-out both;
         }
-
-        #send-btn {
-            background: #4A90E2; 
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
-            cursor: pointer;
-            font-family: 'Arial', sans-serif;
-            transition: background 0.3s ease;
-        }
-
-        #send-btn:hover {
-            background: #357ABD;
-        }
-
-        h1 {
-            color: #2C7A7B; 
-            font-family: 'Georgia', serif;
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        .dot-1 { animation-delay: -0.32s; }
+        .dot-2 { animation-delay: -0.16s; }
     </style>
 </head>
-<body>
-    <div class="chat-container">
-        <h1 class="text-center mb-4">Health Advisor 🩺</h1>
-        <div class="chat-box" id="chat-box">
-            <div class="bot-message">
-                <span class="bot-response">Welcome!</span> <span class="bot-response-normal">Ask me any health-related questions.</span>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 text-white antialiased">
+
+    <div class="flex flex-col h-screen max-w-3xl mx-auto px-4">
+        <header class="py-6 text-center">
+            <div class="flex items-center justify-center gap-4 relative">
+                <h1 id="ui-title" class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+                    Health Advisor AI
+                </h1>
+                <div class="absolute right-0">
+                    <select id="language-selector" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-cyan-500 focus:border-cyan-500 p-2">
+                        <option value="en">English</option>
+                        <option value="es">Español</option>
+                        <option value="hi">हिन्दी</option>
+                        <option value="fr">Français</option>
+                        <option value="de">Deutsch</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="or">ଓଡିଆ</option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="input-group">
-            <input type="text" id="user-input" class="form-control" placeholder="Ask a health-related question...">
-            <button id="send-btn" class="btn btn-primary">Send</button>
-        </div>
+            <p id="ui-subtitle" class="text-gray-400 mt-2">Your friendly AI-powered health resource</p>
+        </header>
+
+        <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6">
+            <div class="bot-message flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 L 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
+                </div>
+                <div id="ui-welcome" class="prose prose-invert max-w-none bg-gray-800/50 rounded-lg p-4 rounded-tl-none">
+                    <p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="py-4">
+            <div class="relative bg-gray-800 border border-gray-700 rounded-xl shadow-lg">
+                <input type="text" id="user-input" class="w-full bg-transparent text-gray-200 placeholder-gray-500 py-4 pl-5 pr-16 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-shadow" placeholder="Ask about a health topic...">
+                <button id="send-btn" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
+                    </svg>
+                </button>
+            </div>
+        </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
+        const languageSelector = document.getElementById("language-selector");
 
-        sendBtn.addEventListener("click", async () => {
+        const uiStrings = {
+            en: {
+                title: "Health Advisor AI",
+                subtitle: "Your friendly AI-powered health resource",
+                welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>",
+                placeholder: "Ask about a health topic..."
+            },
+            es: {
+                title: "Asesor de Salud IA",
+                subtitle: "Tu amigable recurso de salud impulsado por IA",
+                welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>",
+                placeholder: "Pregunta sobre un tema de salud..."
+            },
+            hi: {
+                title: "स्वास्थ्य सलाहकार AI",
+                subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन",
+                welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>",
+                placeholder: "स्वास्थ्य विषय के बारे में पूछें..."
+            },
+            fr: {
+                title: "Conseiller Santé IA",
+                subtitle: "Votre ressource santé conviviale alimentée par l'IA",
+                welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>",
+                placeholder: "Posez une question sur un sujet de santé..."
+            },
+            de: {
+                title: "KI-Gesundheitsberater",
+                subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource",
+                welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>",
+                placeholder: "Fragen Sie nach einem Gesundheitsthema..."
+            },
+            te: {
+                title: "ఆరోగ్య సలహాదారు AI",
+                subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు",
+                welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>",
+                placeholder: "ఆరోగ్య అంశం గురించి అడగండి..."
+            },
+            ta: {
+                title: "சுகாதார ஆலோசகர் AI",
+                subtitle: "உங்கள் நட்பு AI- శక్తితో పనిచేసే சுகாதார வளம்",
+                welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>",
+                placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..."
+            },
+            or: {
+                title: "ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା AI",
+                subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |",
+                welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>",
+                placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..."
+            }
+        };
+
+        const setLanguage = (lang) => {
+            const strings = uiStrings[lang] || uiStrings['en'];
+            document.getElementById('ui-title').innerText = strings.title;
+            document.getElementById('ui-subtitle').innerText = strings.subtitle;
+            document.getElementById('ui-welcome').innerHTML = strings.welcome;
+            userInput.placeholder = strings.placeholder;
+            localStorage.setItem('preferredLanguage', lang);
+        };
+
+        languageSelector.addEventListener('change', (e) => {
+            setLanguage(e.target.value);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            languageSelector.value = savedLang;
+            setLanguage(savedLang);
+        });
+
+        const addMessage = (content, type) => {
+            const messageWrapper = document.createElement("div");
+            messageWrapper.className = `${type}-message flex items-start gap-3`;
+            
+            let messageHTML = '';
+
+            if (type === 'user') {
+                messageWrapper.classList.add('justify-end');
+                messageHTML = `
+                    <div class="prose prose-invert max-w-none bg-blue-600 rounded-lg p-4 rounded-br-none">
+                        ${content}
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                `;
+            } else { 
+                messageHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
+                    </div>
+                    <div class="prose prose-invert max-w-none bg-gray-800/50 rounded-lg p-4 rounded-tl-none">
+                        ${content}
+                    </div>
+                `;
+            }
+
+            messageWrapper.innerHTML = messageHTML;
+            chatBox.appendChild(messageWrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        const showTypingIndicator = () => {
+            const typingIndicator = `
+                <div id="typing-indicator" class="bot-message flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
+                    </div>
+                    <div class="bg-gray-800/50 rounded-lg p-4 rounded-tl-none flex items-center space-x-2">
+                        <div class="dot dot-1 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                        <div class="dot dot-2 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                        <div class="dot dot-3 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                    </div>
+                </div>
+            `;
+            chatBox.innerHTML += typingIndicator;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        };
+
+        const hideTypingIndicator = () => {
+            const indicator = document.getElementById("typing-indicator");
+            if (indicator) {
+                indicator.remove();
+            }
+        };
+
+        const handleSend = async () => {
             const question = userInput.value.trim();
             if (!question) return;
 
-            const userMessage = document.createElement("div");
-            userMessage.className = "user-message";
-            userMessage.textContent = question;
-            chatBox.appendChild(userMessage);
-
+            addMessage(question, 'user');
             userInput.value = "";
+            sendBtn.disabled = true;
 
-            chatBox.scrollTop = chatBox.scrollHeight;
+            showTypingIndicator();
 
             try {
+                const selectedLanguage = languageSelector.value;
                 const response = await fetch("/ask", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ question }),
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question: question, language: selectedLanguage }),
                 });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error status: ${response.status}`);
+                }
+
                 const data = await response.json();
+                
+                hideTypingIndicator();
+                addMessage(marked.parse(data.answer), 'bot');
 
-                const cleanResponse = data.answer.replace(/\*\*/g, "");
-
-                const formattedResponse = formatResponse(cleanResponse);
-
-                const botMessage = document.createElement("div");
-                botMessage.className = "bot-message";
-                botMessage.innerHTML = formattedResponse;
-                chatBox.appendChild(botMessage);
-
-                chatBox.scrollTop = chatBox.scrollHeight;
             } catch (error) {
                 console.error("Error fetching response:", error);
+                hideTypingIndicator();
+                addMessage(`Sorry, something went wrong. Please try again. <br><small class="text-red-400">${error.message}</small>`, 'bot');
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus();
             }
-        });
+        };
 
+        sendBtn.addEventListener("click", handleSend);
         userInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
-                sendBtn.click();
+                handleSend();
             }
         });
-
-        function formatResponse(response) {
-            const sentences = response.split(". ");
-            let formattedText = "";
-
-            sentences.forEach((sentence) => {
-                if (sentence.trim()) {
-                    formattedText += `<p class="bot-response-normal">${sentence}.</p>`;
-                }
-            });
-
-            return formattedText;
-        }
     </script>
 </body>
 </html>
+
