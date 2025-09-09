@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import google.generativeai as genai
 
 # Set up API key
-API_KEY = "AIzaSyDVY7Rxr_GpwXiG5QiqIgq7tdKimGbLFoA"  # Replace with your actual Gemini API key
+API_KEY = "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"  # Replace with your actual Gemini API key
 genai.configure(api_key=API_KEY)
 
 HEALTH_KEYWORDS = [
