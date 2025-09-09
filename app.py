@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 import faiss
 import numpy as np
+import re
 
 try:
     import google.generativeai as genai
@@ -10,7 +11,7 @@ except ImportError:
     GENAI_AVAILABLE = False
 
 # --- Configuration ---
-API_KEY = "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"
+API_KEY = os.getenv("API_KEY", "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4")
 if GENAI_AVAILABLE and API_KEY != "YOUR_API_KEY_HERE":
     genai.configure(api_key=API_KEY)
 else:
@@ -21,99 +22,138 @@ else:
 EMBEDDING_MODEL = "models/text-embedding-004"
 GENERATIVE_MODEL = "gemini-1.5-flash"
 
-# File paths for the processed book data
+# File paths
 FAISS_INDEX_PATH = "health_book.index"
 TEXT_CHUNKS_PATH = "health_book_chunks.txt"
 
 # --- Load RAG Data (Book Index and Chunks) ---
 faiss_index = None
 text_chunks = []
-
-if os.path.exists(FAISS_INDEX_PATH) and os.path.exists(TEXT_CHUNKS_PATH):
-    try:
+try:
+    if os.path.exists(FAISS_INDEX_PATH) and os.path.exists(TEXT_CHUNKS_PATH):
         faiss_index = faiss.read_index(FAISS_INDEX_PATH)
         with open(TEXT_CHUNKS_PATH, "r", encoding="utf-8") as f:
             text_chunks = f.read().split("\n---\n")
         print("Successfully loaded FAISS index and text chunks.")
-    except Exception as e:
-        print(f"Error loading RAG files: {e}")
-        faiss_index = None # Disable RAG if loading fails
-else:
-    print("Warning: FAISS index or text chunks file not found. The bot will run without book context.")
+    else:
+        print("Warning: RAG files not found. Bot will run without book context.")
+except Exception as e:
+    print(f"Error loading RAG files: {e}")
+    faiss_index = None
 
-# --- Health Keywords and Language ---
-HEALTH_KEYWORDS = [ "fever", "cold", "flu", "diabetes", "hypertension", "cancer", "asthma", "allergy", "infection", "migraine", "stroke", "cough", "headache", "nausea", "fatigue", "dizziness", "sore throat", "rash", "inflammation", "swelling", "pain", "anxiety", "depression", "stress", "sleep disorders" ] # Truncated for brevity
-LANGUAGE_MAP = { "en": "English", "es": "Spanish", "hi": "Hindi", "fr": "French", "de": "German", "te": "Telugu", "ta": "Tamil", "or": "Odia" }
+# --- Specialized Knowledge & Language ---
+
+# THIS IS THE MISSING PIECE THAT HAS BEEN ADDED BACK
+LANGUAGE_MAP = {
+    "en": "English",
+    "es": "Spanish",
+    "hi": "Hindi",
+    "fr": "French",
+    "de": "German",
+    "te": "Telugu",
+    "ta": "Tamil",
+    "or": "Odia"
+}
+
+VACCINATION_SCHEDULE = {
+    "title": "National Immunization Schedule (India)",
+    "schedule": {
+        "Birth": "BCG, Oral Polio Vaccine (OPV 0), Hepatitis B (Birth dose)",
+        "6 Weeks": "OPV 1, DPT 1, Hepatitis B 1, Rotavirus 1, PCV 1",
+        "10 Weeks": "OPV 2, DPT 2, Hepatitis B 2, Rotavirus 2, PCV 2",
+        "14 Weeks": "OPV 3, DPT 3, Hepatitis B 3, Rotavirus 3, PCV 3",
+        "9-12 Months": "Measles & Rubella (MR) 1st Dose, PCV Booster",
+        "16-24 Months": "DPT Booster 1, OPV Booster, MR 2nd Dose",
+        "5-6 Years": "DPT Booster 2",
+        "10 Years": "Tetanus and adult Diphtheria (Td) vaccine",
+        "16 Years": "Tetanus and adult Diphtheria (Td) vaccine",
+        "Pregnant Women": "Two doses of Td vaccine, and one Td booster if previously vaccinated."
+    },
+    "details": {
+        "BCG": "Bacillus Calmette-Guérin, for Tuberculosis (TB) protection.",
+        "OPV": "Oral Polio Vaccine, protects against Polio.",
+        "Hepatitis B": "Protects against Hepatitis B virus infection.",
+        "DPT": "Diphtheria, Pertussis (Whooping Cough), and Tetanus.",
+        "Rotavirus": "Protects against Rotavirus diarrhea.",
+        "PCV": "Pneumococcal Conjugate Vaccine, protects against certain types of pneumonia and meningitis.",
+        "MR": "Measles and Rubella vaccine.",
+        "Td": "Tetanus and adult Diphtheria vaccine."
+    }
+}
+VACCINE_KEYWORDS = ['vaccine', 'vaccination', 'immunization', 'schedule', 'dpt', 'opv', 'bcg', 'polio', 'measles', 'rubella', 'hepatitis', 'tetanus', 'rota', 'pcv', 'mr', 'td', 'टीका', 'टीकाकरण']
+
 
 # --- Core Functions ---
 
-def is_health_related(question):
+def is_vaccine_question(question):
     question_lower = question.lower()
-    return any(keyword in question_lower for keyword in HEALTH_KEYWORDS)
+    return any(keyword in question_lower for keyword in VACCINE_KEYWORDS)
+
+def get_vaccine_response(language_code="en"):
+    # This function formats the schedule into a clear, readable string.
+    # In a real application, this would also be translated.
+    schedule_info = VACCINATION_SCHEDULE['schedule']
+    details_info = VACCINATION_SCHEDULE['details']
+    
+    response = f"**{VACCINATION_SCHEDULE['title']}**\n\n"
+    response += "Here is the recommended vaccination schedule for children and pregnant women:\n\n"
+    for age, vaccines in schedule_info.items():
+        response += f"- **At {age}:** {vaccines}\n"
+    
+    response += "\n**Details about Vaccines:**\n"
+    for vaccine, detail in details_info.items():
+        response += f"- **{vaccine}:** {detail}\n"
+        
+    return response
 
 def find_best_chunks(question, index, chunks, top_k=3):
-    """Finds the most relevant text chunks from the book for a given question."""
-    if not index or not chunks:
-        return []
-    
+    if not index or not chunks or not GENAI_AVAILABLE: return []
     try:
-        # Generate embedding for the user's question (query)
-        query_embedding_result = genai.embed_content(
-            model=EMBEDDING_MODEL,
-            content=question,
-            task_type="RETRIEVAL_QUERY"
-        )
+        query_embedding_result = genai.embed_content(model=EMBEDDING_MODEL, content=question, task_type="RETRIEVAL_QUERY")
         query_embedding = np.array(query_embedding_result['embedding']).astype('float32').reshape(1, -1)
-        
-        # Search the FAISS index
         distances, indices = index.search(query_embedding, top_k)
-        
-        # Retrieve the corresponding text chunks
-        relevant_chunks = [chunks[i] for i in indices[0]]
-        return relevant_chunks
+        return [chunks[i] for i in indices[0]]
     except Exception as e:
         print(f"Error during FAISS search: {e}")
         return []
 
 def get_health_response(question, language_code="en"):
-    if not GENAI_AVAILABLE:
-        return "The AI health assistant is currently unavailable."
-    
-    language_name = LANGUAGE_MAP.get(language_code, "English")
+    if not GENAI_AVAILABLE: return "The AI health assistant is currently unavailable."
 
-    # Step 1: Find relevant context from the book
+    # PRIORITY 1: Check for vaccine-related questions
+    if is_vaccine_question(question):
+        return get_vaccine_response(language_code)
+
+    # PRIORITY 2: Use the book for general health queries
+    language_name = LANGUAGE_MAP.get(language_code, "English")
     context_from_book = find_best_chunks(question, faiss_index, text_chunks)
     context_str = "\n".join(context_from_book)
 
-    # Step 2: Create a detailed prompt for the AI
     prompt = f"""
-        You are an AI Health Advisor. Your role is to provide helpful and informative content based *primarily on the provided context from a medical encyclopedia*.
+        You are an AI Health Advisor. Your role is to provide helpful, safe, and informative content based primarily on the provided context from a medical encyclopedia.
         You are not a doctor. Your entire response, including the disclaimer, MUST be in {language_name}.
 
         **Context from Medical Encyclopedia:**
         ---
-        {context_str if context_str else "No specific context was found in the book for this query. Answer based on your general knowledge."}
+        {context_str if context_str else "No specific context was found in the book for this query. Answer based on your general knowledge but be cautious."}
         ---
 
         **User's Question:** "{question}"
 
         **Instructions:**
-        1.  Start your response with a disclaimer in {language_name}. The disclaimer must say: "Disclaimer: I am an AI assistant and not a medical professional. This information is for educational purposes only. Please consult with a qualified healthcare provider for any health concerns or before making any decisions related to your health." Make this disclaimer bold.
-        2.  After the disclaimer, answer the user's question.
-        3.  **Crucially, base your answer on the 'Context from Medical Encyclopedia' provided above.** If the context is relevant, synthesize the information to answer the question thoroughly.
-        4.  If the context is not relevant or empty, you may use your general knowledge but state that the information was not found in the provided reference material.
+        1.  Start your response with a disclaimer in {language_name}. The disclaimer must say: "**Disclaimer: I am an AI assistant and not a medical professional. This information is for educational purposes only. Please consult with a qualified healthcare provider for any health concerns or before making any decisions related to your health.**"
+        2.  After the disclaimer, answer the user's question using the 'Context from Medical Encyclopedia'.
+        3.  If the context is not relevant, use your general knowledge but state that specific information was not found in the reference material and strongly recommend consulting a healthcare professional.
     """
-
     try:
         model = genai.GenerativeModel(GENERATIVE_MODEL)
         response = model.generate_content(prompt)
         return response.text if hasattr(response, 'text') and response.text else "I couldn't generate a response."
     except Exception as e:
         print(f"An error occurred during content generation: {e}")
-        return "An error occurred while trying to get a response. Please check the server logs."
+        return "An error occurred while trying to get a response."
 
 # --- Flask Routes ---
-
 app = Flask(__name__)
 
 @app.route("/")
