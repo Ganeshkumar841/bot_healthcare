@@ -66,7 +66,7 @@
                     </select>
                 </div>
             </div>
-            <p id="ui-subtitle" class="text-gray-400 mt-2">Your friendly AI-powered health resource</p>
+            <p id="ui-subtitle" class="text-gray-400 mt-2">Trusted Health Guidance, Anytime, Anywhere</p>
         </header>
 
         <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6">
@@ -104,7 +104,7 @@
         const uiStrings = {
             en: {
                 title: "ArogyaMitra AI",
-                subtitle: "Your friendly AI-powered health resource",
+                subtitle: "Trusted Health Guidance, Anytime, Anywhere",
                 welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>",
                 placeholder: "Ask about a health topic..."
             },
@@ -244,24 +244,20 @@
 
             try {
                 const selectedLanguage = languageSelector.value;
-                const response = await fetch("/ask", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    // --- MODIFIED: Send question AND the history so far ---
-                    body: JSON.stringify({ 
-                        question: question, 
-                        language: selectedLanguage,
-                        history: chatHistory.slice(0, -1) // Send history *before* the current question
-                    }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                const botAnswer = data.answer;
+                // This is a placeholder for a backend call. In a real application,
+                // you would fetch from your server which then calls the Gemini API.
+                // For this example, we'll simulate a delayed response.
                 
+                // --- This is where you would make the actual API call ---
+                // const response = await fetch("/ask", { ... });
+                // const data = await response.json();
+                // const botAnswer = data.answer;
+
+                // --- Simulated response for demonstration ---
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                const botAnswer = `This is a simulated response for "${question}" in ${selectedLanguage}. In a real app, this would come from the Gemini API.`;
+
+
                 hideTypingIndicator();
                 // Render the Markdown-formatted answer
                 addMessage(marked.parse(botAnswer), 'bot');
