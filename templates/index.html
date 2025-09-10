@@ -98,58 +98,17 @@
         const sendBtn = document.getElementById("send-btn");
         const languageSelector = document.getElementById("language-selector");
         
-        // --- NEW: Add a variable to store chat history ---
         let chatHistory = [];
 
         const uiStrings = {
-            en: {
-                title: "ArogyaMitra AI",
-                subtitle: "Trusted Health Guidance, Anytime, Anywhere",
-                welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>",
-                placeholder: "Ask about a health topic..."
-            },
-            es: {
-                title: "Asesor de Salud IA",
-                subtitle: "Tu amigable recurso de salud impulsado por IA",
-                welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>",
-                placeholder: "Pregunta sobre un tema de salud..."
-            },
-            hi: {
-                title: "आरोग्यमित्र AI",
-                subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन",
-                welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>",
-                placeholder: "स्वास्थ्य विषय के बारे में पूछें..."
-            },
-            fr: {
-                title: "Conseiller Santé IA",
-                subtitle: "Votre ressource santé conviviale alimentée par l'IA",
-                welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>",
-                placeholder: "Posez une question sur un sujet de santé..."
-            },
-            de: {
-                title: "KI-Gesundheitsberater",
-                subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource",
-                welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>",
-                placeholder: "Fragen Sie nach einem Gesundheitsthema..."
-            },
-            te: {
-                title: "ఆరోగ్యమిత్ర AI",
-                subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు",
-                welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>",
-                placeholder: "ఆరోగ్య అంశం గురించి అడగండి..."
-            },
-            ta: {
-                title: "ஆரோக்கியமித்ரா AI",
-                subtitle: "உங்கள் நட்பு AI- శక్తితో పనిచేసే சுகாதார வளம்",
-                welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>",
-                placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..."
-            },
-            or: {
-                title: "ଆରୋଗ୍ୟମିତ୍ର AI",
-                subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |",
-                welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>",
-                placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..."
-            }
+            en: { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>", placeholder: "Ask about a health topic..." },
+            es: { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>", placeholder: "Pregunta sobre un tema de salud..." },
+            hi: { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें..." },
+            fr: { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>", placeholder: "Posez une question sur un sujet de santé..." },
+            de: { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema..." },
+            te: { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి..." },
+            ta: { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనిచేసే சுகாதார வளம்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..." },
+            or: { title: "ଆରୋଗ୍ୟମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..." }
         };
 
         const setLanguage = (lang) => {
@@ -159,13 +118,10 @@
             document.getElementById('ui-welcome').innerHTML = strings.welcome;
             userInput.placeholder = strings.placeholder;
             localStorage.setItem('preferredLanguage', lang);
-            // --- NEW: Clear history on language change to start a fresh conversation ---
             chatHistory = [];
         };
 
-        languageSelector.addEventListener('change', (e) => {
-            setLanguage(e.target.value);
-        });
+        languageSelector.addEventListener('change', (e) => setLanguage(e.target.value));
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedLang = localStorage.getItem('preferredLanguage') || 'en';
@@ -176,9 +132,7 @@
         const addMessage = (content, type) => {
             const messageWrapper = document.createElement("div");
             messageWrapper.className = `${type}-message flex items-start gap-3`;
-            
             let messageHTML = '';
-
             if (type === 'user') {
                 messageWrapper.classList.add('justify-end');
                 messageHTML = `
@@ -187,46 +141,40 @@
                     </div>
                     <div class="w-8 h-8 rounded-full bg-gray-700 flex-shrink-0 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </div>
-                `;
-            } else { 
+                    </div>`;
+            } else {
                 messageHTML = `
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
                     <div class="prose prose-invert max-w-none bg-gray-800/50 rounded-lg p-4 rounded-tl-none">
                         ${content}
-                    </div>
-                `;
+                    </div>`;
             }
-
             messageWrapper.innerHTML = messageHTML;
             chatBox.appendChild(messageWrapper);
             chatBox.scrollTop = chatBox.scrollHeight;
         };
 
         const showTypingIndicator = () => {
-            const typingIndicator = `
+            const typingIndicatorHTML = `
                 <div id="typing-indicator" class="bot-message flex items-start gap-3">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
                     <div class="bg-gray-800/50 rounded-lg p-4 rounded-tl-none flex items-center space-x-2">
                         <div class="dot dot-1 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                         <div class="dot dot-2 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                         <div class="dot dot-3 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                     </div>
-                </div>
-            `;
-            chatBox.innerHTML += typingIndicator;
+                </div>`;
+            chatBox.innerHTML += typingIndicatorHTML;
             chatBox.scrollTop = chatBox.scrollHeight;
         };
 
         const hideTypingIndicator = () => {
             const indicator = document.getElementById("typing-indicator");
-            if (indicator) {
-                indicator.remove();
-            }
+            if (indicator) indicator.remove();
         };
 
         const handleSend = async () => {
@@ -234,7 +182,6 @@
             if (!question) return;
 
             addMessage(question, 'user');
-            // --- NEW: Add user message to history in the required format ---
             chatHistory.push({ role: "user", parts: [{ text: question }] });
             
             userInput.value = "";
@@ -244,25 +191,31 @@
 
             try {
                 const selectedLanguage = languageSelector.value;
-                // This is a placeholder for a backend call. In a real application,
-                // you would fetch from your server which then calls the Gemini API.
-                // For this example, we'll simulate a delayed response.
                 
-                // --- This is where you would make the actual API call ---
-                // const response = await fetch("/ask", { ... });
-                // const data = await response.json();
-                // const botAnswer = data.answer;
+                // --- FIX: This section now makes the real API call to your Flask backend ---
+                const response = await fetch("/ask", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        language: selectedLanguage,
+                        history: chatHistory 
+                    }),
+                });
 
-                // --- Simulated response for demonstration ---
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                const botAnswer = `This is a simulated response for "${question}" in ${selectedLanguage}. In a real app, this would come from the Gemini API.`;
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
 
+                const data = await response.json();
+                const botAnswer = data.answer;
+                // --------------------------------------------------------------------------
 
                 hideTypingIndicator();
-                // Render the Markdown-formatted answer
                 addMessage(marked.parse(botAnswer), 'bot');
 
-                // --- NEW: Add bot's raw response to history ---
                 chatHistory.push({ role: "model", parts: [{ text: botAnswer }] });
 
             } catch (error) {

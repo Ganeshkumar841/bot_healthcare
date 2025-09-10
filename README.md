@@ -71,3 +71,7 @@ Pull requests are welcome! Feel free to suggest improvements.
 ---
 **Let's build smarter health solutions together!**
 
+
+
+# to activate the environment
+venv\Scripts\activate
