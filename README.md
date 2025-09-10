@@ -44,14 +44,38 @@ venv\Scripts\activate  # On Windows
 pip install -r requirements.txt
 ```
 
+
 ### 🔹 4. Set up API Key
-Replace `API_KEY` in `app.py` with your actual **Google Gemini API Key**.
+For local development, create a `.env` file with:
+```
+GEMINI_API_KEY=your_actual_google_gemini_api_key
+```
+For deployment on Render:
+- Go to your Render dashboard
+- Open your web service settings
+- Add an environment variable:
+	- Key: `GEMINI_API_KEY`
+	- Value: your actual API key (no quotes)
+
 
 ### 🔹 5. Run the Flask app
 ```sh
 python app.py
 ```
 Access the chatbot at **http://127.0.0.1:5000/** in your browser.
+
+---
+
+## 🚀 Deploying to Render (Free)
+1. Push your code to GitHub.
+2. Go to [https://render.com](https://render.com) and create a new Web Service.
+3. Connect your GitHub repo and select your project.
+4. Render will auto-detect your `.render.yaml` and set up the build/start commands.
+5. Add your `GEMINI_API_KEY` as an environment variable in the Render dashboard.
+6. Click "Manual Deploy" to deploy your app.
+7. Your app will be live at the provided Render URL.
+
+**Note:** Free Render instances may spin down with inactivity, causing a delay on the first request.
 
 ## API Endpoint
 The chatbot also supports a **POST** request for API integration:

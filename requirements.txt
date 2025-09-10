@@ -4,3 +4,6 @@ requests
 google-generativeai
 gunicorn
 python-dotenv
+faiss-cpu
+numpy
+pdfplumber
