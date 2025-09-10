@@ -1,0 +1,8 @@
+# .render.yaml for deploying Flask app on Render
+services:
+  - type: web
+    name: ai-health-chatbot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    plan: free
