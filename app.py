@@ -5,11 +5,8 @@ import faiss
 import numpy as np
 import re
 
-# --- Load Environment Variables ---
-# This safely loads your API key from the .env file.
 load_dotenv()
 
-# --- Library and API Key Configuration ---
 try:
     import google.generativeai as genai
     GENAI_AVAILABLE = True
@@ -26,15 +23,12 @@ else:
     GENAI_AVAILABLE = False
     print("Warning: GENAI_AVAILABLE is False. Check if the API key is in your .env file and the genai library is installed.")
 
-# --- Models ---
 EMBEDDING_MODEL = "models/text-embedding-004"
 GENERATIVE_MODEL = "gemini-1.5-flash"
 
-# --- File paths ---
 FAISS_INDEX_PATH = "health_book.index"
 TEXT_CHUNKS_PATH = "health_book_chunks.txt"
 
-# --- Load RAG Data (Book Index and Chunks) ---
 faiss_index = None
 text_chunks = []
 try:
@@ -49,13 +43,9 @@ except Exception as e:
     print(f"Error loading RAG files: {e}")
     faiss_index = None
 
-# --- Model Initialization (RUNS ONCE AT STARTUP) ---
-# PERFORMANCE FIX: We initialize the model here so it's not re-created on every request.
 generative_model = None
 if GENAI_AVAILABLE:
     try:
-        # Define the core system prompt just once.
-        # The dynamic parts (language, context) will be added to the user's question later.
         SYSTEM_INSTRUCTION = """
             You are an AI Health Advisor. Your persona is supportive, knowledgeable, and cautious. Your role is to provide helpful, safe, and informative content based primarily on the provided context from a medical encyclopedia.
             Your tone must be concise, clear, supportive, and never rude or demotivating.
@@ -83,20 +73,16 @@ if GENAI_AVAILABLE:
         print(f"Could not initialize generative model: {e}")
         GENAI_AVAILABLE = False
 
-
-# --- Specialized Knowledge & Language (Hardcoded Data) ---
 LANGUAGE_MAP = { "en": "English", "es": "Spanish", "hi": "Hindi", "fr": "French", "de": "German", "te": "Telugu", "ta": "Tamil", "or": "Odia" }
 VACCINATION_SCHEDULE = { "title": "National Immunization Schedule (India)", "schedule": { "Birth": "BCG, Oral Polio Vaccine (OPV 0), Hepatitis B (Birth dose)", "6 Weeks": "OPV 1, DPT 1, Hepatitis B 1, Rotavirus 1, PCV 1", "10 Weeks": "OPV 2, DPT 2, Hepatitis B 2, Rotavirus 2, PCV 2", "14 Weeks": "OPV 3, DPT 3, Hepatitis B 3, Rotavirus 3, PCV 3", "9-12 Months": "Measles & Rubella (MR) 1st Dose, PCV Booster", "16-24 Months": "DPT Booster 1, OPV Booster, MR 2nd Dose", "5-6 Years": "DPT Booster 2", "10 Years": "Tetanus and adult Diphtheria (Td) vaccine", "16 Years": "Tetanus and adult Diphtheria (Td) vaccine", "Pregnant Women": "Two doses of Td vaccine, and one Td booster if previously vaccinated." }, "details": { "BCG": "Bacillus Calmette-Guérin, for Tuberculosis (TB) protection.", "OPV": "Oral Polio Vaccine, protects against Polio.", "Hepatitis B": "Protects against Hepatitis B virus infection.", "DPT": "Diphtheria, Pertussis (Whooping Cough), and Tetanus.", "Rotavirus": "Protects against Rotavirus diarrhea.", "PCV": "Pneumococcal Conjugate Vaccine, protects against certain types of pneumonia and meningitis.", "MR": "Measles and Rubella vaccine.", "Td": "Tetanus and adult Diphtheria vaccine." } }
 VACCINE_KEYWORDS = ['vaccine', 'vaccination', 'immunization', 'schedule', 'dpt', 'opv', 'bcg', 'polio', 'measles', 'rubella', 'hepatitis', 'tetanus', 'rota', 'pcv', 'mr', 'td', 'टीका', 'टीकाकरण']
 
-# --- Core Functions ---
 
 def is_vaccine_question(question):
     return any(keyword in question.lower() for keyword in VACCINE_KEYWORDS)
 
 def get_vaccine_response(language_code="en"):
     # TODO: This response should be translated based on the language_code.
-    # For now, it returns English.
     schedule_info = VACCINATION_SCHEDULE['schedule']
     details_info = VACCINATION_SCHEDULE['details']
     response = f"**{VACCINATION_SCHEDULE['title']}**\n\nHere is the recommended vaccination schedule:\n\n"
@@ -122,17 +108,15 @@ def get_health_response(question, language_code="en", history=[]):
     if not GENAI_AVAILABLE or not generative_model:
         return "The AI health assistant is currently unavailable. Please check server logs for configuration errors."
 
-    # PRIORITY 1: Check for vaccine-related questions.
+
     if is_vaccine_question(question):
         return get_vaccine_response(language_code)
 
-    # PRIORITY 2: Use RAG for general health queries.
+
     language_name = LANGUAGE_MAP.get(language_code, "English")
     context_from_book = find_best_chunks(question)
     context_str = "\n".join(context_from_book)
 
-    # We now pass the dynamic information (context, language) along with the user's question.
-    # The main system prompt is already configured in the model.
     full_prompt = f"""
         My entire response MUST be in {language_name}.
 
@@ -145,7 +129,7 @@ def get_health_response(question, language_code="en", history=[]):
     """
 
     try:
-        # PERFORMANCE FIX: Re-use the initialized model instead of creating a new one.
+  
         chat = generative_model.start_chat(history=history)
         response = chat.send_message(full_prompt)
         return response.text if hasattr(response, 'text') and response.text else "I couldn't generate a response."
@@ -154,7 +138,6 @@ def get_health_response(question, language_code="en", history=[]):
         return "An error occurred while trying to get a response from the AI model."
 
 
-# --- Flask Application ---
 app = Flask(__name__)
 
 @app.route("/")
@@ -163,7 +146,6 @@ def home():
 
 @app.route('/favicon.ico')
 def favicon():
-    # FIX: This handles the browser's request for an icon, preventing the 404 error.
     return '', 204
 
 @app.route("/ask", methods=["POST"])

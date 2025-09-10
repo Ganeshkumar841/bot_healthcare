@@ -2,7 +2,7 @@ import os
 import re
 import faiss
 import numpy as np
-import pdfplumber  # You'll need to install this: pip install pdfplumber
+import pdfplumber  
 
 try:
     import google.generativeai as genai
@@ -10,8 +10,6 @@ try:
 except ImportError:
     GENAI_AVAILABLE = False
 
-# --- Configuration ---
-# Make sure your API_KEY is set as an environment variable or replace the string below.
 API_KEY = "AIzaSyBK8mGnBUsRoQPVmZaITMG0KkfYkEmCUP4"
 if GENAI_AVAILABLE and API_KEY != "YOUR_API_KEY_HERE":
     genai.configure(api_key=API_KEY)
@@ -20,14 +18,14 @@ else:
     print("Warning: API_KEY is not set or google.generativeai is not installed. This script cannot run.")
     exit()
 
-# Model for creating embeddings
+
 EMBEDDING_MODEL = "models/text-embedding-004"
 
-# --- File Paths ---
+
 PDF_PATH = "The Encyclopedia O fNatural Medicine.pdf"
 FAISS_INDEX_PATH = "natural_medicine.index"
 TEXT_CHUNKS_PATH = "natural_medicine_chunks.txt"
-EMBEDDING_DIMENSION = 768 # Dimension for text-embedding-004
+EMBEDDING_DIMENSION = 768
 
 def extract_text_from_pdf(pdf_path):
     """Extracts text from a PDF file, preserving paragraphs."""
@@ -47,7 +45,7 @@ def extract_text_from_pdf(pdf_path):
 def chunk_text(text, chunk_size=1200, overlap=100):
     """Splits text into overlapping chunks based on paragraphs."""
     print("Chunking text...")
-    # Clean up excessive newlines and spaces
+
     text = re.sub(r'\s*\n\s*', '\n', text).strip()
     paragraphs = [p.strip() for p in text.split('\n') if len(p.strip()) > 10]
 
@@ -58,7 +56,7 @@ def chunk_text(text, chunk_size=1200, overlap=100):
             current_chunk += p + "\n"
         else:
             chunks.append(current_chunk.strip())
-            current_chunk = p[-overlap:] + "\n" # Start next chunk with overlap
+            current_chunk = p[-overlap:] + "\n"
     if current_chunk:
         chunks.append(current_chunk.strip())
 
@@ -77,7 +75,7 @@ def create_embeddings(chunks):
             embeddings.append(result['embedding'])
         except Exception as e:
             print(f"Error creating embedding for chunk {i+1}: {e}")
-            # Add a zero vector as a placeholder to avoid breaking the index
+
             embeddings.append([0.0] * EMBEDDING_DIMENSION)
             
     print("Embedding creation complete.")
@@ -88,25 +86,25 @@ def main():
     if not GENAI_AVAILABLE:
         return
 
-    # 1. Extract text from the PDF
+
     book_text = extract_text_from_pdf(PDF_PATH)
     if not book_text:
         return
 
-    # 2. Chunk the text
+
     text_chunks = chunk_text(book_text)
 
-    # 3. Create embeddings for each chunk
+
     embeddings = create_embeddings(text_chunks)
 
-    # 4. Create and save the FAISS index
+
     print("Creating FAISS index...")
     index = faiss.IndexFlatL2(EMBEDDING_DIMENSION)
     index.add(embeddings)
     faiss.write_index(index, FAISS_INDEX_PATH)
     print(f"FAISS index saved to '{FAISS_INDEX_PATH}'")
 
-    # 5. Save the text chunks
+
     print("Saving text chunks...")
     with open(TEXT_CHUNKS_PATH, "w", encoding="utf-8") as f:
         f.write("\n---\n".join(text_chunks))
