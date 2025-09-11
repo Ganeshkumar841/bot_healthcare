@@ -99,3 +99,9 @@ Pull requests are welcome! Feel free to suggest improvements.
 
 # to activate the environment
 venv\Scripts\activate
+
+## the path follwed to create this upto this stage
+The journey went like this:
+PDF → RAG Files → Flask Backend → Web Frontend → Deployment
+
+From a simple medical PDF, ArogyaMitra AI grew into a fully functional, safe, and interactive health chatbot.

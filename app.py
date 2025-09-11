@@ -24,7 +24,7 @@ else:
     print("Warning: GENAI_AVAILABLE is False. Check if the API key is in your .env file and the genai library is installed.")
 
 EMBEDDING_MODEL = "models/text-embedding-004"
-GENERATIVE_MODEL = "gemini-1.5-flash"
+GENERATIVE_MODEL = "gemini-2.0-flash-lite"
 
 FAISS_INDEX_PATH = "health_book.index"
 TEXT_CHUNKS_PATH = "health_book_chunks.txt"

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArogyaMitra AI - Gemini AI</title>
+    <title>ArogyaMitra AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -211,7 +211,7 @@
 
                 const data = await response.json();
                 const botAnswer = data.answer;
-          
+        
 
                 hideTypingIndicator();
                 addMessage(marked.parse(botAnswer), 'bot');
