@@ -43,6 +43,15 @@
         }
         .dot-1 { animation-delay: -0.32s; }
         .dot-2 { animation-delay: -0.16s; }
+        /* Style for recording state */
+        .recording {
+            color: #ef4444; /* red-500 */
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-gray-900 to-gray-800 text-white antialiased">
@@ -82,7 +91,21 @@
 
         <footer class="py-4">
             <div class="relative bg-gray-800 border border-gray-700 rounded-xl shadow-lg">
-                <input type="text" id="user-input" class="w-full bg-transparent text-gray-200 placeholder-gray-500 py-4 pl-5 pr-16 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-shadow" placeholder="Ask about a health topic...">
+                <input type="text" id="user-input" class="w-full bg-transparent text-gray-200 placeholder-gray-500 py-4 pl-5 pr-40 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-shadow" placeholder="Ask about a health topic...">
+                
+                <!-- --- NEW: Stop Audio Button --- -->
+                <button id="stop-btn" class="absolute right-[96px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
+                </button>
+
+                <button id="mic-btn" class="absolute right-[52px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="22"></line>
+                    </svg>
+                </button>
+                
                 <button id="send-btn" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-cyan-500 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
@@ -97,8 +120,11 @@
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
         const languageSelector = document.getElementById("language-selector");
+        const micBtn = document.getElementById("mic-btn");
+        const stopBtn = document.getElementById("stop-btn"); // New button
         
         let chatHistory = [];
+        let currentAudio = null; // To keep track of the currently playing audio
 
         const uiStrings = {
             en: { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>", placeholder: "Ask about a health topic..." },
@@ -108,7 +134,7 @@
             de: { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema..." },
             te: { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి..." },
             ta: { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనిచేసే சுகாதார வளம்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..." },
-            or: { title: "ଆରୋଗ୍ୟମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..." }
+            or: { title: "ଆରୋଗ్యମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..." }
         };
 
         const setLanguage = (lang) => {
@@ -128,11 +154,44 @@
             languageSelector.value = savedLang;
             setLanguage(savedLang);
         });
+        
+        // --- NEW: Function to stop audio playback ---
+        const stopAudio = () => {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+                stopBtn.classList.add('hidden');
+            }
+        };
 
-        const addMessage = (content, type) => {
+        // --- NEW: Function to play audio from base64 string ---
+        const playAudio = (base64String) => {
+            stopAudio(); // Stop any currently playing audio first
+            const audioSource = `data:audio/mp3;base64,${base64String}`;
+            currentAudio = new Audio(audioSource);
+            currentAudio.play();
+            stopBtn.classList.remove('hidden');
+            currentAudio.onended = () => {
+                stopBtn.classList.add('hidden');
+                currentAudio = null;
+            };
+        };
+        
+        stopBtn.addEventListener('click', stopAudio);
+
+        const addMessage = (content, type, audioData = null) => {
             const messageWrapper = document.createElement("div");
             messageWrapper.className = `${type}-message flex items-start gap-3`;
             let messageHTML = '';
+            
+            // --- MODIFIED: Add speaker icon for bot messages with audio ---
+            const speakerIcon = `
+                <button class="ml-2 text-gray-400 hover:text-cyan-300 transition-colors" onclick="playAudio('${audioData}')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </button>
+            `;
+
             if (type === 'user') {
                 messageWrapper.classList.add('justify-end');
                 messageHTML = `
@@ -147,8 +206,9 @@
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 flex-shrink-0 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
-                    <div class="prose prose-invert max-w-none bg-gray-800/50 rounded-lg p-4 rounded-tl-none">
-                        ${content}
+                    <div class="prose prose-invert max-w-none bg-gray-800/50 rounded-lg p-4 rounded-tl-none flex items-center">
+                        <div>${content}</div>
+                        ${audioData ? speakerIcon : ''}
                     </div>`;
             }
             messageWrapper.innerHTML = messageHTML;
@@ -177,10 +237,12 @@
             if (indicator) indicator.remove();
         };
 
-        const handleSend = async () => {
+        // --- MODIFIED: Function now accepts an input source ('text' or 'voice') ---
+        const handleSend = async (source = 'text') => {
             const question = userInput.value.trim();
             if (!question) return;
 
+            stopAudio(); // Stop any audio if a new message is sent
             addMessage(question, 'user');
             chatHistory.push({ role: "user", parts: [{ text: question }] });
             
@@ -191,17 +253,14 @@
 
             try {
                 const selectedLanguage = languageSelector.value;
-                
-
                 const response = await fetch("/ask", {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question: question,
                         language: selectedLanguage,
-                        history: chatHistory 
+                        history: chatHistory,
+                        source: source // Send the input source to the backend
                     }),
                 });
 
@@ -211,10 +270,14 @@
 
                 const data = await response.json();
                 const botAnswer = data.answer;
-        
-
+                const audioData = data.audio;
+            
                 hideTypingIndicator();
-                addMessage(marked.parse(botAnswer), 'bot');
+                addMessage(marked.parse(botAnswer), 'bot', audioData);
+                
+                if (audioData) {
+                    playAudio(audioData);
+                }
 
                 chatHistory.push({ role: "model", parts: [{ text: botAnswer }] });
 
@@ -228,12 +291,87 @@
             }
         };
 
-        sendBtn.addEventListener("click", handleSend);
+        sendBtn.addEventListener("click", () => handleSend('text'));
         userInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
-                handleSend();
+                handleSend('text');
             }
         });
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        micBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                    userInput.placeholder = "Listening...";
+                    
+                    mediaRecorder.addEventListener("stop", async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        audioChunks = [];
+                        stream.getTracks().forEach(track => track.stop());
+                        
+                        if (audioBlob.size === 0) {
+                           console.log("Empty recording, not sending.");
+                           setLanguage(languageSelector.value);
+                           return;
+                        }
+
+                        userInput.placeholder = "Transcribing...";
+                        
+                        const formData = new FormData();
+                        formData.append("audio_data", audioBlob);
+
+                        try {
+                            const response = await fetch("/transcribe", {
+                                method: "POST",
+                                body: formData,
+                            });
+                            
+                            if (!response.ok) {
+                                throw new Error(`Transcription failed with status: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+                            userInput.value = data.transcription;
+                            if (data.transcription) {
+                                // --- MODIFIED: Automatically send after successful transcription ---
+                                handleSend('voice'); 
+                            }
+                            
+                        } catch (error) {
+                            console.error("Error sending audio:", error);
+                            addMessage(`Sorry, could not transcribe audio. <br><small class="text-red-400">${error.message}</small>`, 'bot');
+                        } finally {
+                           setLanguage(languageSelector.value);
+                        }
+                    });
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                } catch (err) {
+                    console.error("Error accessing microphone:", err);
+                    addMessage("Could not access the microphone. Please grant permission and try again.", 'bot');
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                }
+                isRecording = false;
+                micBtn.classList.remove('recording');
+            }
+        });
+
     </script>
 </body>
 </html>
+
