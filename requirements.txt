@@ -1,14 +1,13 @@
 #pip install -r requirements.txt
 
 flask
-requests
+python-dotenv
 google-generativeai
 gunicorn
-python-dotenv
 faiss-cpu
 numpy
-pdfplumber
-vosk
 langdetect
 deep-translator
 edge-tts
+openai
+pdfplumber

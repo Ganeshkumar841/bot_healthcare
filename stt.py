@@ -2,88 +2,59 @@
 # 1. Imports and Initial Setup
 # ==============================================================================
 import os
-import wave
-import json
-import subprocess
+from openai import OpenAI
+from dotenv import load_dotenv
 
-# --- NEW: vosk library for offline speech recognition ---
-from vosk import Model, KaldiRecognizer
+load_dotenv()
 
 # ==============================================================================
-# 2. Vosk Model Configuration
+# 2. OpenAI Whisper Configuration
 # ==============================================================================
 
-MODEL_PATH = "vosk-model-small-en-in-0.4" 
+API_KEY = os.getenv("OPENAI_API_KEY")
 
-try:
-    if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError
-    model = Model(MODEL_PATH)
-    print("Vosk model loaded successfully.")
-except FileNotFoundError:
+if not API_KEY or "YOUR_OPENAI_API_KEY" in API_KEY:
     print("="*80)
-    print(f"VOSK MODEL NOT FOUND at path: '{MODEL_PATH}'")
-    print("Please download a model from https://alphacephei.com/vosk/models")
-    print("Unzip it, and place the folder in the root directory of this project.")
+    print("OPENAI API KEY NOT FOUND or is a placeholder.")
+    print("Please set a valid OPENAI_API_KEY in your .env file to use voice input.")
     print("="*80)
-    model = None
-except Exception as e:
-    print(f"Error loading Vosk model: {e}")
-    model = None
+    client = None
+else:
+    try:
+        client = OpenAI(api_key=API_KEY)
+        print("OpenAI client initialized successfully for Whisper STT.")
+    except Exception as e:
+        print(f"Error initializing OpenAI client: {e}")
+        client = None
 
 # ==============================================================================
-# 3. Core Transcription Function (NEW In-Memory Method)
+# 3. Core Transcription Function (Using OpenAI Whisper)
 # ==============================================================================
 
 def transcribe_audio(file_path):
     """
-    Transcribes audio by creating an in-memory pipeline from ffmpeg to Vosk,
-    avoiding intermediate files to prevent locking issues on Windows.
-    """
-    if not model:
-        raise RuntimeError("Vosk model is not loaded. Cannot perform transcription.")
+    Transcribes audio using the OpenAI Whisper API.
 
-    # --- Step 1: Define the FFmpeg command to output to stdout ---
-    command = [
-        'ffmpeg',
-        '-i', file_path,       # Input file
-        '-acodec', 'pcm_s16le', # Audio codec for WAV
-        '-ac', '1',             # Mono channel
-        '-ar', '16000',         # Sample rate required by Vosk
-        '-f', 'wav',            # Output format
-        '-'                     # Pipe output to stdout
-    ]
+    Args:
+        file_path (str): The path to the audio file to transcribe.
+
+    Returns:
+        str: The transcribed text.
+    """
+    if not client:
+        raise RuntimeError("OpenAI client is not initialized. Cannot perform transcription.")
 
     try:
-        # --- Step 2: Run FFmpeg and pipe its output ---
-        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        
-        # --- Step 3: Feed the audio data directly into Vosk ---
-        rec = KaldiRecognizer(model, 16000)
-        rec.SetWords(True)
-
-        # Read audio data from ffmpeg's stdout in chunks
-        while True:
-            data = process.stdout.read(4000)
-            if len(data) == 0:
-                break
-            if rec.AcceptWaveform(data):
-                # This part can be used for partial results, but we'll use the final one
-                pass
-
-        # --- Step 4: Check for errors and get final result ---
-        stderr_output = process.stderr.read().decode('utf-8', errors='ignore')
-        if process.wait() != 0:
-             print(f"FFmpeg Error: {stderr_output}")
-             raise RuntimeError("FFmpeg process failed during audio conversion.")
-
-        result = json.loads(rec.FinalResult())
-        return result.get("text", "")
+        with open(file_path, "rb") as audio_file:
+            # --- Call the Whisper API ---
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file
+            )
+        print("Successfully transcribed audio with Whisper.")
+        return transcription.text
 
     except Exception as e:
-        print(f"An error occurred during in-memory transcription: {e}")
-        # Ensure the process is terminated if it's still running
-        if 'process' in locals() and process.poll() is None:
-            process.kill()
+        print(f"An error occurred during Whisper transcription: {e}")
+        # Re-raise the exception to be handled by the main app, so the user sees an error
         raise
-
