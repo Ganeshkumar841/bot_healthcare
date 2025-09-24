@@ -11,7 +11,6 @@ import faiss
 import numpy as np
 
 # Import custom modules
-# Make sure stt.py, translator.py, and tts.py are in the same directory
 from stt import transcribe_audio
 from translator import detect_and_translate
 from tts import generate_speech_base64
@@ -100,13 +99,22 @@ if GENAI_AVAILABLE:
         print(f"Could not initialize generative model: {e}")
         GENAI_AVAILABLE = False
 
+
 # ==============================================================================
 # 3. Helper Functions
 # ==============================================================================
+
+# --- UPDATED VOICE MAP ---
+# This map connects the language codes from the frontend to specific TTS voices.
 VOICE_MAP = {
-    "en": "en-US-AriaNeural", "es": "es-MX-DaliaNeural", "hi": "hi-IN-SwaraNeural",
-    "fr": "fr-FR-DeniseNeural", "de": "de-DE-KatjaNeural", "te": "te-IN-ShrutiNeural",
-    "ta": "ta-IN-PallaviNeural", "or": "or-IN-NiranjanNeural"
+    "en": "en-US-AriaNeural",      # English (US)
+    "es": "es-ES-ElviraNeural",     # Spanish (Spain)
+    "hi": "hi-IN-SwaraNeural",      # Hindi (India, Female)
+    "fr": "fr-FR-DeniseNeural",     # French (France)
+    "de": "de-DE-KatjaNeural",      # German (Germany)
+    "te": "te-IN-ShrutiNeural",     # Telugu (India)
+    "ta": "ta-IN-PallaviNeural",    # Tamil (India)
+    "or": "or-IN-AshaNeural"        # Odia (India, Female)
 }
 LANGUAGE_MAP = { "en": "English", "es": "Spanish", "hi": "Hindi", "fr": "French", "de": "German", "te": "Telugu", "ta": "Tamil", "or": "Odia" }
 
@@ -163,31 +171,57 @@ def favicon():
 
 @app.route("/ask", methods=["POST"])
 def ask():
-    data = request.get_json()
-    user_question = data.get("question")
-    language = data.get("language", "en")
-    history = data.get("history", [])
-    source = data.get("source", "text")
+    try:
+        data = request.get_json()
+        user_question = data.get("question")
+        language = data.get("language", "en") # e.g., 'hi'
+        
+        # --- FIX: Add a check for an empty or invalid language string ---
+        if not language or language not in LANGUAGE_MAP:
+            language = "en" # Default to English if the language is missing or not supported
 
-    if not user_question:
-        return jsonify({"error": "No question provided"}), 400
+        history = data.get("history", [])
+        source = data.get("source", "text")
 
-    answer = get_health_response(user_question, language, history)
-    
-    audio_base64 = ""
-    # Only generate audio if the request came from a voice input
-    if source == 'voice':
-        voice = VOICE_MAP.get(language)
-        if voice:
+        if not user_question:
+            return jsonify({"error": "No question provided"}), 400
+
+        # --- Translate non-English questions to English for the model ---
+        question_for_model = user_question
+        if language != 'en':
             try:
-                # Remove markdown for cleaner speech
-                speech_text = re.sub(r'[\*#]', '', answer)
-                audio_base64 = asyncio.run(generate_speech_base64(speech_text, voice=voice))
+                # Use the translator utility to convert the user's question to English
+                question_for_model = detect_and_translate(user_question, target_lang='en')
+                print(f"Translated question from '{language}' to 'en': '{question_for_model}'")
             except Exception as e:
-                print(f"Error during TTS generation for language {language}: {e}")
-                
-    return jsonify({"answer": answer, "audio": audio_base64})
+                print(f"Could not translate question, using original. Error: {e}")
+                # Fallback to using the original question if translation fails
+                question_for_model = user_question
+        
+        # The model gets the English question, but is still instructed to reply in the user's original language
+        answer = get_health_response(question_for_model, language, history)
+        
+        audio_base64 = ""
+        if source == 'voice':
+            voice = VOICE_MAP.get(language) # This now uses the updated, more comprehensive map
+            if voice:
+                try:
+                    speech_text = re.sub(r'[\*#]', '', answer) # Remove markdown for cleaner speech
+                    audio_base_64 = asyncio.run(generate_speech_base64(speech_text, voice=voice))
+                except Exception as e:
+                    print(f"Error during TTS generation for language {language}: {e}")
+                    # Gracefully fail by not including audio, rather than crashing.
+                    audio_base_64 = ""
+                    
+        return jsonify({"answer": answer, "audio": audio_base_64})
+    except Exception as e:
+        # This is the global safety net. It catches any unhandled errors in this route.
+        print(f"A critical error occurred in the /ask route: {e}")
+        # It ensures a valid JSON error is sent back, preventing the frontend crash.
+        return jsonify({"error": "A critical server error occurred. Please check the backend logs for details."}), 500
 
+# Note: This endpoint is no longer used by the main voice flow since the frontend
+# now handles speech-to-text. It is kept for potential fallback or other uses.
 @app.route("/transcribe", methods=["POST"])
 def transcribe_route():
     if 'audio_data' not in request.files:
@@ -196,38 +230,20 @@ def transcribe_route():
     audio_file = request.files['audio_data']
     language = request.form.get('language', 'en')
     
-    print(f"Received audio file: {audio_file.filename or 'N/A'}")
-    print(f"Content type: {audio_file.content_type}")
-    print(f"Language for transcription: {language}")
-    
     try:
-        # Securely create an isolated temporary directory to handle the file
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Determine a safe filename and path
-            file_extension = 'webm' # Default extension
-            if audio_file.filename and '.' in audio_file.filename:
-                file_extension = audio_file.filename.rsplit('.', 1)[1].lower()
-            
-            temp_path = os.path.join(temp_dir, f'temp_audio.{file_extension}')
+            temp_path = os.path.join(temp_dir, 'temp_audio.webm')
             audio_file.save(temp_path)
             
-            print(f"Saved audio file to: {temp_path}")
-            print(f"File size: {os.path.getsize(temp_path)} bytes")
-
-            # Call the transcription function from stt.py
-            # This function handles the conversion from webm/other formats to WAV
             transcribed_text = transcribe_audio(temp_path, lang_code=language)
-            print(f"Raw transcription result: '{transcribed_text}'")
-            
-            # The model works best with English, so we translate the transcribed text
             final_text = detect_and_translate(transcribed_text, target_lang='en')
-            print(f"Translated text for model processing: '{final_text}'")
 
             return jsonify({"transcription": final_text})
 
     except Exception as e:
-        print(f"Error during transcription/translation process: {e}")
+        print(f"Error during transcription process: {e}")
         return jsonify({"error": f"Failed to process audio. Details: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
+

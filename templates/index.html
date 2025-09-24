@@ -43,14 +43,16 @@
         }
         .dot-1 { animation-delay: -0.32s; }
         .dot-2 { animation-delay: -0.16s; }
+        
         /* Style for recording state */
         .recording {
             color: #ef4444; /* red-500 */
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4); /* red-500 with opacity */
             animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
         }
     </style>
 </head>
@@ -64,14 +66,14 @@
                 </h1>
                 <div class="absolute right-0">
                     <select id="language-selector" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2">
-                        <option value="en">English</option>
-                        <option value="es">Español</option>
-                        <option value="hi">हिन्दी</option>
-                        <option value="fr">Français</option>
-                        <option value="de">Deutsch</option>
-                        <option value="te">తెలుగు</option>
-                        <option value="ta">தமிழ்</option>
-                        <option value="or">ଓଡିଆ</option>
+                        <option value="en-US">English</option>
+                        <option value="es-ES">Español</option>
+                        <option value="hi-IN">हिन्दी</option>
+                        <option value="fr-FR">Français</option>
+                        <option value="de-DE">Deutsch</option>
+                        <option value="te-IN">తెలుగు</option>
+                        <option value="ta-IN">தமிழ்</option>
+                        <option value="or-IN">ଓଡିଆ</option>
                     </select>
                 </div>
             </div>
@@ -99,7 +101,7 @@
                 </button>
 
                 <button id="mic-btn" class="absolute right-[52px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                         <line x1="12" y1="19" x2="12" y2="22"></line>
@@ -127,18 +129,20 @@
         let currentAudio = null;
 
         const uiStrings = {
-            en: { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>", placeholder: "Ask about a health topic..." },
-            es: { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>", placeholder: "Pregunta sobre un tema de salud..." },
-            hi: { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें..." },
-            fr: { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>", placeholder: "Posez une question sur un sujet de santé..." },
-            de: { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema..." },
-            te: { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి..." },
-            ta: { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్তితో పనিచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகাதார ஆலோசகர். அறிகুறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..." },
-            or: { title: "ଆରୋଗ್যମିত్ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..." }
+            'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>", placeholder: "Ask about a health topic...", listening: "Listening... speak now." },
+            'es-ES': { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>", placeholder: "Pregunta sobre un tema de salud...", listening: "Escuchando... hable ahora." },
+            'hi-IN': { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
+            'fr-FR': { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>", placeholder: "Posez une question sur un sujet de santé...", listening: "J'écoute... parlez maintenant." },
+            'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
+            'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
+            'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనিచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகুறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
+            'or-IN': { title: "ଆରୋଗ୍ଯମିତ్ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" }
         };
 
+        const getCurrentStrings = () => uiStrings[languageSelector.value] || uiStrings['en-US'];
+
         const setLanguage = (lang) => {
-            const strings = uiStrings[lang] || uiStrings['en'];
+            const strings = uiStrings[lang] || uiStrings['en-US'];
             document.getElementById('ui-title').innerText = strings.title;
             document.getElementById('ui-subtitle').innerText = strings.subtitle;
             document.getElementById('ui-welcome').innerHTML = strings.welcome;
@@ -149,7 +153,7 @@
         languageSelector.addEventListener('change', (e) => setLanguage(e.target.value));
 
         document.addEventListener('DOMContentLoaded', () => {
-            const savedLang = localStorage.getItem('preferredLanguage') || 'en';
+            const savedLang = localStorage.getItem('preferredLanguage') || 'en-US';
             languageSelector.value = savedLang;
             setLanguage(savedLang);
         });
@@ -247,13 +251,14 @@
             showTypingIndicator();
 
             try {
-                const selectedLanguage = languageSelector.value;
+                // Extract the base language code (e.g., 'en' from 'en-US') for the backend
+                const languageCode = languageSelector.value.split('-')[0];
                 const response = await fetch("/ask", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question: question,
-                        language: selectedLanguage,
+                        language: languageCode,
                         history: chatHistory.slice(0, -1),
                         source: source
                     }),
@@ -294,132 +299,80 @@
             }
         });
 
-        let mediaRecorder;
-        let audioChunks = [];
+        // --- New Speech Recognition Logic ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition;
         let isRecording = false;
+        let silenceTimeout;
 
-        micBtn.addEventListener('click', async () => {
-            if (!isRecording) {
-                try {
-                    // Request audio with optimal constraints for speech recognition
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        audio: {
-                            channelCount: 1, // Mono audio
-                            sampleRate: 16000, // 16kHz sample rate for better compatibility
-                            sampleSize: 16, // 16-bit samples
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true
-                        } 
-                    });
-                    
-                    // Use WAV format if available, fallback to webm
-                    let options = {};
-                    if (MediaRecorder.isTypeSupported('audio/wav')) {
-                        options.mimeType = 'audio/wav';
-                    } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=pcm')) {
-                        options.mimeType = 'audio/webm;codecs=pcm';
-                    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-                        options.mimeType = 'audio/webm';
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true; // Keep listening even after a pause
+            recognition.interimResults = true; // Get results as they are being spoken
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                userInput.placeholder = getCurrentStrings().listening;
+                sendBtn.disabled = true;
+            };
+
+            recognition.onresult = (event) => {
+                clearTimeout(silenceTimeout); // Reset silence timer on new speech
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
                     }
-                    
-                    mediaRecorder = new MediaRecorder(stream, options);
-                    console.log('Using MIME type:', mediaRecorder.mimeType);
-                    
-                    mediaRecorder.start();
-                    isRecording = true;
-                    micBtn.classList.add('recording');
-                    userInput.placeholder = "Listening... (speak clearly)";
-                    
-                    // Auto-stop after 30 seconds
-                    const autoStopTimeout = setTimeout(() => {
-                        if (isRecording && mediaRecorder && mediaRecorder.state === "recording") {
-                            console.log("Auto-stopping recording after 30 seconds");
-                            mediaRecorder.stop();
-                        }
-                    }, 30000);
-                    
-                    mediaRecorder.addEventListener("stop", async () => {
-                        clearTimeout(autoStopTimeout);
-                        
-                        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-                        audioChunks = [];
-                        stream.getTracks().forEach(track => track.stop());
-                        
-                        console.log('Recorded audio blob size:', audioBlob.size, 'bytes');
-                        console.log('Recorded audio type:', audioBlob.type);
-                        
-                        if (audioBlob.size < 2000) {
-                            console.log("Recording too small, likely empty or too short.");
-                            addMessage("Recording was too short or empty. Please try again and speak clearly.", 'bot');
-                            setLanguage(languageSelector.value);
-                            return;
-                        }
-
-                        userInput.placeholder = "Processing your voice...";
-                        
-                        const selectedLanguage = languageSelector.value;
-                        const formData = new FormData();
-                        
-                        // Determine file extension based on MIME type
-                        let fileExtension = 'webm';
-                        if (audioBlob.type.includes('wav')) {
-                            fileExtension = 'wav';
-                        } else if (audioBlob.type.includes('mp3')) {
-                            fileExtension = 'mp3';
-                        }
-                        
-                        formData.append("audio_data", audioBlob, `recording.${fileExtension}`);
-                        formData.append("language", selectedLanguage);
-
-                        try {
-                            const response = await fetch("/transcribe", {
-                                method: "POST",
-                                body: formData,
-                            });
-                            
-                            if (!response.ok) {
-                                const errData = await response.json();
-                                throw new Error(errData.error || `Transcription failed with status: ${response.status}`);
-                            }
-
-                            const data = await response.json();
-                            console.log('Transcription result:', data.transcription);
-                            
-                            if (data.transcription && data.transcription.trim()) {
-                                userInput.value = data.transcription;
-                                handleSend('voice');
-                            } else {
-                                addMessage("I couldn't understand what you said. Please try speaking more clearly or check your microphone.", 'bot');
-                            }
-                            
-                        } catch (error) {
-                            console.error("Error sending audio:", error);
-                            addMessage(`Sorry, could not process your voice input: ${error.message}`, 'bot');
-                        } finally {
-                            setLanguage(languageSelector.value);
-                        }
-                    });
-
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        if (event.data && event.data.size > 0) {
-                            audioChunks.push(event.data);
-                        }
-                    });
-
-                } catch (err) {
-                    console.error("Error accessing microphone:", err);
-                    addMessage("Could not access the microphone. Please grant permission and try again.", 'bot');
                 }
-            } else {
-                if (mediaRecorder && mediaRecorder.state === "recording") {
-                    mediaRecorder.stop();
-                }
+                userInput.value = finalTranscript + interimTranscript;
+
+                // Set a timer to stop if no new results come in for 7 seconds
+                 silenceTimeout = setTimeout(() => {
+                    if(isRecording) recognition.stop();
+                }, 7000);
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                addMessage(`Sorry, a speech recognition error occurred: ${event.error}`, 'bot');
+            };
+
+            recognition.onend = () => {
                 isRecording = false;
                 micBtn.classList.remove('recording');
+                userInput.placeholder = getCurrentStrings().placeholder;
+                sendBtn.disabled = false;
+                clearTimeout(silenceTimeout);
+
+                // Automatically send the transcribed text
+                if (userInput.value.trim()) {
+                    handleSend('voice');
+                }
+            };
+
+        } else {
+            console.log("Speech Recognition not supported in this browser.");
+            micBtn.disabled = true;
+        }
+
+        micBtn.addEventListener('click', () => {
+            if (!SpeechRecognition) return;
+
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                stopAudio(); // Stop any bot audio before starting to listen
+                recognition.lang = languageSelector.value;
+                recognition.start();
             }
         });
 
     </script>
 </body>
 </html>
+
