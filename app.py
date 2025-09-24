@@ -11,7 +11,7 @@ import faiss
 import numpy as np
 
 # Import custom modules
-# We will use the new stt.py with OpenAI Whisper
+# Make sure stt.py, translator.py, and tts.py are in the same directory
 from stt import transcribe_audio
 from translator import detect_and_translate
 from tts import generate_speech_base64
@@ -37,7 +37,7 @@ else:
     GENAI_AVAILABLE = False
     print("Warning: GENAI_AVAILABLE is False. Check if the GEMINI_API_KEY is set in .env")
 
-# --- Model Configuration (Updated based on reference) ---
+# --- Model Configuration ---
 EMBEDDING_MODEL = "models/text-embedding-004"
 GENERATIVE_MODEL = "gemini-1.5-flash-latest"
 
@@ -62,7 +62,6 @@ except Exception as e:
 generative_model = None
 if GENAI_AVAILABLE:
     try:
-        # --- Upgraded System Instruction for Advanced Logic and Verification (from reference) ---
         SYSTEM_INSTRUCTION = """
         You are ArogyaMitra AI, a friendly and empathetic voice-based health advisor. Your primary role is to provide safe, helpful, and informative content based on verified health knowledge. You must adhere to the following rules at all times:
 
@@ -176,6 +175,7 @@ def ask():
     answer = get_health_response(user_question, language, history)
     
     audio_base64 = ""
+    # Only generate audio if the request came from a voice input
     if source == 'voice':
         voice = VOICE_MAP.get(language)
         if voice:
@@ -194,26 +194,40 @@ def transcribe_route():
         return jsonify({"error": "No audio file provided"}), 400
     
     audio_file = request.files['audio_data']
+    language = request.form.get('language', 'en')
+    
+    print(f"Received audio file: {audio_file.filename or 'N/A'}")
+    print(f"Content type: {audio_file.content_type}")
+    print(f"Language for transcription: {language}")
     
     try:
-        # Securely create an isolated temporary directory
+        # Securely create an isolated temporary directory to handle the file
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Use a filename that Whisper can easily handle
-            temp_path = os.path.join(temp_dir, 'temp_audio.webm')
+            # Determine a safe filename and path
+            file_extension = 'webm' # Default extension
+            if audio_file.filename and '.' in audio_file.filename:
+                file_extension = audio_file.filename.rsplit('.', 1)[1].lower()
+            
+            temp_path = os.path.join(temp_dir, f'temp_audio.{file_extension}')
             audio_file.save(temp_path)
             
-            # Call the NEW Whisper transcription function
-            transcribed_text = transcribe_audio(temp_path)
-            
-            # Translate the result to English for the model if needed
-            final_text = detect_and_translate(transcribed_text, target_lang='en')
+            print(f"Saved audio file to: {temp_path}")
+            print(f"File size: {os.path.getsize(temp_path)} bytes")
 
-        return jsonify({"transcription": final_text})
+            # Call the transcription function from stt.py
+            # This function handles the conversion from webm/other formats to WAV
+            transcribed_text = transcribe_audio(temp_path, lang_code=language)
+            print(f"Raw transcription result: '{transcribed_text}'")
+            
+            # The model works best with English, so we translate the transcribed text
+            final_text = detect_and_translate(transcribed_text, target_lang='en')
+            print(f"Translated text for model processing: '{final_text}'")
+
+            return jsonify({"transcription": final_text})
 
     except Exception as e:
-        print(f"Error during transcription/translation: {e}")
-        return jsonify({"error": "Failed to process audio"}), 500
+        print(f"Error during transcription/translation process: {e}")
+        return jsonify({"error": f"Failed to process audio. Details: {str(e)}"}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run(debug=True, port=5000)

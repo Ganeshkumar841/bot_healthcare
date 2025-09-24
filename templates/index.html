@@ -133,8 +133,8 @@
             fr: { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>", placeholder: "Posez une question sur un sujet de santé..." },
             de: { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema..." },
             te: { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి..." },
-            ta: { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనిచేసే சுகாதார வளம்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..." },
-            or: { title: "ଆରୋଗ్యମିତ్ర AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..." }
+            ta: { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్তితో పనিచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகাதார ஆலோசகர். அறிகুறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்..." },
+            or: { title: "ଆରୋଗ್যମିত్ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ..." }
         };
 
         const setLanguage = (lang) => {
@@ -163,7 +163,6 @@
             }
         };
 
-        // This function needs to be global to be accessible by the onclick attribute
         window.playAudio = (base64String) => {
             stopAudio();
             const audioSource = `data:audio/mp3;base64,${base64String}`;
@@ -302,29 +301,76 @@
         micBtn.addEventListener('click', async () => {
             if (!isRecording) {
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
+                    // Request audio with optimal constraints for speech recognition
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            channelCount: 1, // Mono audio
+                            sampleRate: 16000, // 16kHz sample rate for better compatibility
+                            sampleSize: 16, // 16-bit samples
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        } 
+                    });
+                    
+                    // Use WAV format if available, fallback to webm
+                    let options = {};
+                    if (MediaRecorder.isTypeSupported('audio/wav')) {
+                        options.mimeType = 'audio/wav';
+                    } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=pcm')) {
+                        options.mimeType = 'audio/webm;codecs=pcm';
+                    } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+                        options.mimeType = 'audio/webm';
+                    }
+                    
+                    mediaRecorder = new MediaRecorder(stream, options);
+                    console.log('Using MIME type:', mediaRecorder.mimeType);
                     
                     mediaRecorder.start();
                     isRecording = true;
                     micBtn.classList.add('recording');
-                    userInput.placeholder = "Listening...";
+                    userInput.placeholder = "Listening... (speak clearly)";
+                    
+                    // Auto-stop after 30 seconds
+                    const autoStopTimeout = setTimeout(() => {
+                        if (isRecording && mediaRecorder && mediaRecorder.state === "recording") {
+                            console.log("Auto-stopping recording after 30 seconds");
+                            mediaRecorder.stop();
+                        }
+                    }, 30000);
                     
                     mediaRecorder.addEventListener("stop", async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        clearTimeout(autoStopTimeout);
+                        
+                        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
                         audioChunks = [];
                         stream.getTracks().forEach(track => track.stop());
                         
-                        if (audioBlob.size < 1000) {
-                            console.log("Empty or very short recording, not sending.");
-                            setLanguage(languageSelector.value); // Reset placeholder
+                        console.log('Recorded audio blob size:', audioBlob.size, 'bytes');
+                        console.log('Recorded audio type:', audioBlob.type);
+                        
+                        if (audioBlob.size < 2000) {
+                            console.log("Recording too small, likely empty or too short.");
+                            addMessage("Recording was too short or empty. Please try again and speak clearly.", 'bot');
+                            setLanguage(languageSelector.value);
                             return;
                         }
 
-                        userInput.placeholder = "Transcribing...";
+                        userInput.placeholder = "Processing your voice...";
                         
+                        const selectedLanguage = languageSelector.value;
                         const formData = new FormData();
-                        formData.append("audio_data", audioBlob);
+                        
+                        // Determine file extension based on MIME type
+                        let fileExtension = 'webm';
+                        if (audioBlob.type.includes('wav')) {
+                            fileExtension = 'wav';
+                        } else if (audioBlob.type.includes('mp3')) {
+                            fileExtension = 'mp3';
+                        }
+                        
+                        formData.append("audio_data", audioBlob, `recording.${fileExtension}`);
+                        formData.append("language", selectedLanguage);
 
                         try {
                             const response = await fetch("/transcribe", {
@@ -338,21 +384,27 @@
                             }
 
                             const data = await response.json();
-                            userInput.value = data.transcription;
-                            if (data.transcription) {
-                                handleSend('voice'); 
+                            console.log('Transcription result:', data.transcription);
+                            
+                            if (data.transcription && data.transcription.trim()) {
+                                userInput.value = data.transcription;
+                                handleSend('voice');
+                            } else {
+                                addMessage("I couldn't understand what you said. Please try speaking more clearly or check your microphone.", 'bot');
                             }
                             
                         } catch (error) {
                             console.error("Error sending audio:", error);
-                            addMessage(`Sorry, could not transcribe audio. <br><small class="text-red-400">${error.message}</small>`, 'bot');
+                            addMessage(`Sorry, could not process your voice input: ${error.message}`, 'bot');
                         } finally {
-                           setLanguage(languageSelector.value); // Reset placeholder
+                            setLanguage(languageSelector.value);
                         }
                     });
 
                     mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
+                        if (event.data && event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
                     });
 
                 } catch (err) {
@@ -371,4 +423,3 @@
     </script>
 </body>
 </html>
-

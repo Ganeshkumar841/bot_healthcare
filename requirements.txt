@@ -1,5 +1,3 @@
-#pip install -r requirements.txt
-
 flask
 python-dotenv
 google-generativeai
@@ -9,5 +7,7 @@ numpy
 langdetect
 deep-translator
 edge-tts
-openai
 pdfplumber
+SpeechRecognition
+pyaudio
+pydub
