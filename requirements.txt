@@ -9,5 +9,4 @@ deep-translator
 edge-tts
 pdfplumber
 SpeechRecognition
-pyaudio
 pydub
