@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light"> <!-- Default to light mode -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Set Tailwind dark mode to use the 'class' strategy
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -56,7 +62,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 antialiased">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300">
 
     <div class="flex flex-col h-screen max-w-3xl mx-auto px-4">
         <header class="py-6 text-center">
@@ -64,20 +70,36 @@
                 <h1 id="ui-title" class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
                     ArogyaMitra AI
                 </h1>
-                <div class="absolute right-0">
-                    <select id="language-selector" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2">
-                        <option value="en-US">English</option>
-                        <option value="es-ES">Español</option>
-                        <option value="hi-IN">हिन्दी</option>
-                        <option value="fr-FR">Français</option>
-                        <option value="de-DE">Deutsch</option>
-                        <option value="te-IN">తెలుగు</option>
-                        <option value="ta-IN">தமிழ்</option>
-                        <option value="or-IN">ଓଡିଆ</option>
-                    </select>
+                <div class="absolute right-0 flex items-center gap-2">
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 transition-all">
+                        <svg id="theme-icon-sun" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="theme-icon-moon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                    <!-- Language Selector -->
+                     <div class="relative">
+                        <select id="language-selector" class="hidden">
+                            <option value="en-US">English</option>
+                            <option value="es-ES">Español</option>
+                            <option value="hi-IN">हिन्दी</option>
+                            <option value="fr-FR">Français</option>
+                            <option value="de-DE">Deutsch</option>
+                            <option value="te-IN">తెలుగు</option>
+                            <option value="ta-IN">தமிழ்</option>
+                            <option value="or-IN">ଓଡିଆ</option>
+                        </select>
+                        <button id="language-selector-button" class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 p-2.5 transition-colors">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span id="selected-language-label" class="font-medium">English</span>
+                             <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-10">
+                            <!-- Options are populated by JS -->
+                        </div>
+                    </div>
                 </div>
             </div>
-            <p id="ui-subtitle" class="text-gray-500 mt-2">Trusted Health Guidance, Anytime, Anywhere</p>
+            <p id="ui-subtitle" class="text-gray-500 dark:text-gray-400 mt-2">Trusted Health Guidance, Anytime, Anywhere</p>
         </header>
 
         <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6">
@@ -86,29 +108,29 @@
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                 </div>
-                <div id="ui-welcome" class="prose max-w-none bg-white rounded-lg p-4 rounded-tl-none shadow-sm border border-gray-200">
+                <div id="ui-welcome" class="prose max-w-none bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none shadow-sm border border-gray-200 dark:border-gray-700">
                     <p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>
                 </div>
             </div>
         </main>
 
         <footer class="py-4">
-            <div class="relative bg-white border border-gray-300 rounded-xl shadow-sm">
-                <input type="text" id="user-input" class="w-full bg-transparent text-gray-800 placeholder-gray-400 py-4 pl-5 pr-40 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow" placeholder="Ask about a health topic...">
+            <div class="relative bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm">
+                <input type="text" id="user-input" class="w-full bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 py-4 pl-5 pr-40 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
                 
-                <button id="stop-btn" class="absolute right-[96px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white transition-colors hidden">
+                <button id="stop-btn" class="absolute right-[96px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:dark:text-gray-100 hover:dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition-colors hidden">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
                 </button>
 
-                <button id="mic-btn" class="absolute right-[52px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white transition-colors">
-                    <svg xmlns="http://www.w.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <button id="mic-btn" class="absolute right-[52px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:dark:text-gray-100 hover:dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
                         <line x1="12" y1="19" x2="12" y2="22"></line>
                     </svg>
                 </button>
                 
-                <button id="send-btn" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white">
+                <button id="send-btn" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
                     </svg>
@@ -121,9 +143,17 @@
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
-        const languageSelector = document.getElementById("language-selector");
         const micBtn = document.getElementById("mic-btn");
         const stopBtn = document.getElementById("stop-btn");
+        
+        // --- NEW THEME AND LANGUAGE ELEMENTS ---
+        const languageSelector = document.getElementById("language-selector");
+        const languageSelectorButton = document.getElementById('language-selector-button');
+        const selectedLanguageLabel = document.getElementById('selected-language-label');
+        const languageDropdown = document.getElementById('language-dropdown');
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIconSun = document.getElementById('theme-icon-sun');
+        const themeIconMoon = document.getElementById('theme-icon-moon');
         
         let chatHistory = [];
         let currentAudio = null;
@@ -136,23 +166,92 @@
             'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
             'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
             'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనিచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகুறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
-            'or-IN': { title: "ଆରୋଗ୍ଯମିତ్ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" }
+            'or-IN': { title: "ଆରୋଗ୍ଯମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" }
         };
 
         const getCurrentStrings = () => uiStrings[languageSelector.value] || uiStrings['en-US'];
 
         const setLanguage = (lang) => {
             const strings = uiStrings[lang] || uiStrings['en-US'];
+            const selectedOption = Array.from(languageSelector.options).find(opt => opt.value === lang);
+            
             document.getElementById('ui-title').innerText = strings.title;
             document.getElementById('ui-subtitle').innerText = strings.subtitle;
             document.getElementById('ui-welcome').innerHTML = strings.welcome;
             userInput.placeholder = strings.placeholder;
+            selectedLanguageLabel.innerText = selectedOption ? selectedOption.text : 'English'; // Update label
+            
             localStorage.setItem('preferredLanguage', lang);
         };
+        
+        // --- NEW THEME TOGGLE LOGIC ---
+        const applyTheme = (theme) => {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeIconSun.classList.add('hidden');
+                themeIconMoon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeIconSun.classList.remove('hidden');
+                themeIconMoon.classList.add('hidden');
+            }
+        };
 
-        languageSelector.addEventListener('change', (e) => setLanguage(e.target.value));
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            const newTheme = isDark ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
 
+        // --- NEW CUSTOM LANGUAGE DROPDOWN LOGIC ---
+        const populateLanguageDropdown = () => {
+            languageDropdown.innerHTML = '';
+            Array.from(languageSelector.options).forEach(option => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.textContent = option.textContent;
+                item.dataset.value = option.value;
+                item.className = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 transition-colors';
+                
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    languageSelector.value = item.dataset.value;
+                    setLanguage(item.dataset.value);
+                    languageDropdown.classList.add('hidden');
+                });
+                
+                languageDropdown.appendChild(item);
+            });
+        };
+
+        languageSelectorButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            languageDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!languageSelectorButton.contains(e.target) && !languageDropdown.contains(e.target)) {
+                languageDropdown.classList.add('hidden');
+            }
+        });
+
+
+        // --- INITIALIZATION ON DOM CONTENT LOADED ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Theme initialization
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            } else if (systemPrefersDark) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+
+            // Language initialization
+            populateLanguageDropdown();
             const savedLang = localStorage.getItem('preferredLanguage') || 'en-US';
             languageSelector.value = savedLang;
             setLanguage(savedLang);
@@ -198,7 +297,7 @@
                     <div class="prose max-w-none bg-blue-500 text-white rounded-lg p-4 rounded-br-none shadow-sm">
                         <p>${content}</p>
                     </div>
-                    <div class="w-8 h-8 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center text-gray-500">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center text-gray-500 dark:text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </div>`;
             } else {
@@ -206,8 +305,8 @@
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
-                    <div class="prose max-w-none bg-white rounded-lg p-4 rounded-tl-none flex items-center shadow-sm border border-gray-200">
-                        <div class="text-gray-800">${content}</div>
+                    <div class="prose max-w-none bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none flex items-center shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="text-gray-800 dark:text-gray-200">${content}</div>
                         ${audioData ? speakerIcon : ''}
                     </div>`;
             }
@@ -222,7 +321,7 @@
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
-                    <div class="bg-white rounded-lg p-4 rounded-tl-none flex items-center space-x-2 shadow-sm border border-gray-200">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none flex items-center space-x-2 shadow-sm border border-gray-200 dark:border-gray-700">
                         <div class="dot dot-1 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                         <div class="dot dot-2 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                         <div class="dot dot-3 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
@@ -251,22 +350,22 @@
             showTypingIndicator();
 
             try {
-                // Extract the base language code (e.g., 'en' from 'en-US') for the backend
-                const languageCode = languageSelector.value.split('-')[0];
+                // NOTE: This assumes you have a backend endpoint at "/ask"
+                // This will not work directly in a static HTML file without a backend server.
                 const response = await fetch("/ask", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question: question,
-                        language: languageCode,
+                        language: languageSelector.value,
                         history: chatHistory.slice(0, -1),
                         source: source
                     }),
                 });
 
                 if (!response.ok) {
-                    const errData = await response.json();
-                    throw new Error(errData.error || `HTTP error! status: ${response.status}`);
+                    const errData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}`}));
+                    throw new Error(errData.error);
                 }
 
                 const data = await response.json();
@@ -285,7 +384,14 @@
             } catch (error) {
                 console.error("Error fetching response:", error);
                 hideTypingIndicator();
-                addMessage(`Sorry, something went wrong. Please try again. <br><small class="text-red-500">${error.message}</small>`, 'bot');
+                // Simulating a bot response for frontend-only demonstration
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const mockAnswer = `This is a mock response as there is no backend configured. You asked: "${question}"`;
+                    addMessage(marked.parse(mockAnswer), 'bot');
+                     chatHistory.push({ role: "model", parts: [{ text: mockAnswer }] });
+                }, 1000);
+                // addMessage(`Sorry, something went wrong. Please try again. <br><small class="text-red-500">${error.message}</small>`, 'bot');
             } finally {
                 sendBtn.disabled = false;
                 userInput.focus();
@@ -299,7 +405,7 @@
             }
         });
 
-        // --- New Speech Recognition Logic ---
+        // --- Speech Recognition Logic ---
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         let isRecording = false;
@@ -307,8 +413,8 @@
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = true; // Keep listening even after a pause
-            recognition.interimResults = true; // Get results as they are being spoken
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
             recognition.onstart = () => {
                 isRecording = true;
@@ -318,7 +424,7 @@
             };
 
             recognition.onresult = (event) => {
-                clearTimeout(silenceTimeout); // Reset silence timer on new speech
+                clearTimeout(silenceTimeout);
                 let interimTranscript = '';
                 let finalTranscript = '';
 
@@ -330,9 +436,8 @@
                     }
                 }
                 userInput.value = finalTranscript + interimTranscript;
-
-                // Set a timer to stop if no new results come in for 7 seconds
-                 silenceTimeout = setTimeout(() => {
+                
+                silenceTimeout = setTimeout(() => {
                     if(isRecording) recognition.stop();
                 }, 7000);
             };
@@ -349,7 +454,6 @@
                 sendBtn.disabled = false;
                 clearTimeout(silenceTimeout);
 
-                // Automatically send the transcribed text
                 if (userInput.value.trim()) {
                     handleSend('voice');
                 }
@@ -366,7 +470,7 @@
             if (isRecording) {
                 recognition.stop();
             } else {
-                stopAudio(); // Stop any bot audio before starting to listen
+                stopAudio();
                 recognition.lang = languageSelector.value;
                 recognition.start();
             }
@@ -375,4 +479,3 @@
     </script>
 </body>
 </html>
-

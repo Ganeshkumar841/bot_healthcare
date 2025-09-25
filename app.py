@@ -104,19 +104,27 @@ if GENAI_AVAILABLE:
 # 3. Helper Functions
 # ==============================================================================
 
-# --- UPDATED VOICE MAP ---
-# This map connects the language codes from the frontend to specific TTS voices.
+# --- FIX: Updated keys to match the frontend values (e.g., 'en-US') ---
 VOICE_MAP = {
-    "en": "en-US-AriaNeural",      # English (US)
-    "es": "es-ES-ElviraNeural",     # Spanish (Spain)
-    "hi": "hi-IN-SwaraNeural",      # Hindi (India, Female)
-    "fr": "fr-FR-DeniseNeural",     # French (France)
-    "de": "de-DE-KatjaNeural",      # German (Germany)
-    "te": "te-IN-ShrutiNeural",     # Telugu (India)
-    "ta": "ta-IN-PallaviNeural",    # Tamil (India)
-    "or": "or-IN-AshaNeural"        # Odia (India, Female)
+    "en-US": "en-US-AriaNeural",
+    "es-ES": "es-ES-ElviraNeural",
+    "hi-IN": "hi-IN-SwaraNeural",
+    "fr-FR": "fr-FR-DeniseNeural",
+    "de-DE": "de-DE-KatjaNeural",
+    "te-IN": "te-IN-ShrutiNeural",
+    "ta-IN": "ta-IN-PallaviNeural",
+    "or-IN": "or-IN-AshaNeural"
 }
-LANGUAGE_MAP = { "en": "English", "es": "Spanish", "hi": "Hindi", "fr": "French", "de": "German", "te": "Telugu", "ta": "Tamil", "or": "Odia" }
+LANGUAGE_MAP = {
+    "en-US": "English",
+    "es-ES": "Spanish",
+    "hi-IN": "Hindi",
+    "fr-FR": "French",
+    "de-DE": "German",
+    "te-IN": "Telugu",
+    "ta-IN": "Tamil",
+    "or-IN": "Odia"
+}
 
 def find_best_chunks(question, top_k=3):
     if not faiss_index or not text_chunks or not GENAI_AVAILABLE: return []
@@ -129,7 +137,7 @@ def find_best_chunks(question, top_k=3):
         print(f"Error during FAISS search: {e}")
         return []
 
-def get_health_response(question, language_code="en", history=[]):
+def get_health_response(question, language_code="en-US", history=[]):
     if not GENAI_AVAILABLE or not generative_model:
         return "The AI health assistant is currently unavailable. Please check server logs."
     
@@ -174,11 +182,11 @@ def ask():
     try:
         data = request.get_json()
         user_question = data.get("question")
-        language = data.get("language", "en") # e.g., 'hi'
+        language = data.get("language", "en-US")
         
         # --- FIX: Add a check for an empty or invalid language string ---
         if not language or language not in LANGUAGE_MAP:
-            language = "en" # Default to English if the language is missing or not supported
+            language = "en-US" # Default to English if the language is missing or not supported
 
         history = data.get("history", [])
         source = data.get("source", "text")
@@ -188,40 +196,34 @@ def ask():
 
         # --- Translate non-English questions to English for the model ---
         question_for_model = user_question
-        if language != 'en':
+        # FIX: More robust check to avoid translating English to English
+        if not language.startswith('en'):
             try:
                 # Use the translator utility to convert the user's question to English
                 question_for_model = detect_and_translate(user_question, target_lang='en')
                 print(f"Translated question from '{language}' to 'en': '{question_for_model}'")
             except Exception as e:
                 print(f"Could not translate question, using original. Error: {e}")
-                # Fallback to using the original question if translation fails
                 question_for_model = user_question
         
-        # The model gets the English question, but is still instructed to reply in the user's original language
         answer = get_health_response(question_for_model, language, history)
         
         audio_base64 = ""
         if source == 'voice':
-            voice = VOICE_MAP.get(language) # This now uses the updated, more comprehensive map
+            voice = VOICE_MAP.get(language)
             if voice:
                 try:
-                    speech_text = re.sub(r'[\*#]', '', answer) # Remove markdown for cleaner speech
+                    speech_text = re.sub(r'[\*#]', '', answer)
                     audio_base_64 = asyncio.run(generate_speech_base64(speech_text, voice=voice))
                 except Exception as e:
                     print(f"Error during TTS generation for language {language}: {e}")
-                    # Gracefully fail by not including audio, rather than crashing.
                     audio_base_64 = ""
                     
         return jsonify({"answer": answer, "audio": audio_base_64})
     except Exception as e:
-        # This is the global safety net. It catches any unhandled errors in this route.
         print(f"A critical error occurred in the /ask route: {e}")
-        # It ensures a valid JSON error is sent back, preventing the frontend crash.
         return jsonify({"error": "A critical server error occurred. Please check the backend logs for details."}), 500
 
-# Note: This endpoint is no longer used by the main voice flow since the frontend
-# now handles speech-to-text. It is kept for potential fallback or other uses.
 @app.route("/transcribe", methods=["POST"])
 def transcribe_route():
     if 'audio_data' not in request.files:
