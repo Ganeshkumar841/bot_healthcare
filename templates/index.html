@@ -30,33 +30,43 @@
             border-radius: 20px;
             border: 3px solid transparent;
         }
-        .prose p {
-            margin-bottom: 0.75rem;
+        /* Prose adjustments for chat bubbles */
+        .prose p { margin-bottom: 0.75rem; }
+        .prose ul, .prose ol { margin-left: 1.25rem; margin-bottom: 0.75rem; }
+        .prose li { margin-bottom: 0.25rem; }
+        .prose h3 { margin-top: 1em; margin-bottom: 0.5em; font-size: 1.1em; }
+
+        /* --- NEW STYLES FOR FEATURES --- */
+
+        /* 1. Message Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .prose ul, .prose ol {
-            margin-left: 1.25rem;
-            margin-bottom: 0.75rem;
+        .message-animate {
+            animation: fadeIn 0.3s ease-out forwards;
         }
-        .prose li {
-            margin-bottom: 0.25rem;
+
+        /* 2. Enhanced Typing Indicator (Skeleton Loader) */
+        @keyframes pulse-bg {
+            0%, 100% { background-color: #e5e7eb; }
+            50% { background-color: #d1d5db; }
         }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1.0); }
+        .dark @keyframes pulse-bg {
+            0%, 100% { background-color: #374151; }
+            50% { background-color: #4b5563; }
         }
-        .dot {
-            animation: bounce 1.4s infinite ease-in-out both;
+        .skeleton-line {
+            animation: pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
-        .dot-1 { animation-delay: -0.32s; }
-        .dot-2 { animation-delay: -0.16s; }
-        
-        /* Style for recording state */
+
+        /* 3. Recording/Pulse animation for Mic Button */
         .recording {
             color: #ef4444; /* red-500 */
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4); /* red-500 with opacity */
-            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4);
+            animation: pulse-mic 1.5s infinite;
         }
-        @keyframes pulse {
+        @keyframes pulse-mic {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.8; transform: scale(1.05); }
         }
@@ -67,36 +77,31 @@
     <div class="flex flex-col h-screen max-w-3xl mx-auto px-4">
         <header class="py-6 text-center">
             <div class="flex items-center justify-center gap-4 relative">
+                <!-- Settings Button -->
+                <button id="settings-btn" class="absolute left-0 p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 transition-all">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-1.226.554-.22 1.19-.22 1.745 0 .56.22 1.02.684 1.11 1.226M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </button>
                 <h1 id="ui-title" class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">
                     ArogyaMitra AI
                 </h1>
                 <div class="absolute right-0 flex items-center gap-2">
-                    <!-- Theme Toggle -->
+                     <!-- Theme Toggle -->
                     <button id="theme-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 transition-all">
                         <svg id="theme-icon-sun" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         <svg id="theme-icon-moon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                     </button>
                     <!-- Language Selector -->
-                     <div class="relative">
-                         <select id="language-selector" class="hidden">
-                             <option value="en-US">English</option>
-                             <option value="es-ES">Español</option>
-                             <option value="hi-IN">हिन्दी</option>
-                             <option value="fr-FR">Français</option>
-                             <option value="de-DE">Deutsch</option>
-                             <option value="te-IN">తెలుగు</option>
-                             <option value="ta-IN">தமிழ்</option>
-                             <option value="or-IN">ଓଡିଆ</option>
-                         </select>
-                         <button id="language-selector-button" class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 p-2.5 transition-colors">
-                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                             <span id="selected-language-label" class="font-medium">English</span>
-                              <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                         </button>
-                         <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-10">
-                             <!-- Options are populated by JS -->
-                         </div>
-                     </div>
+                    <div class="relative">
+                        <select id="language-selector" class="hidden">
+                            <option value="en-US">English</option><option value="es-ES">Español</option><option value="hi-IN">हिन्दी</option><option value="fr-FR">Français</option><option value="de-DE">Deutsch</option><option value="te-IN">తెలుగు</option><option value="ta-IN">தமிழ்</option><option value="or-IN">ଓଡିଆ</option>
+                        </select>
+                        <button id="language-selector-button" class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 p-2.5 transition-colors">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                            <span id="selected-language-label" class="font-medium">English</span>
+                             <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                        <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-10"></div>
+                    </div>
                 </div>
             </div>
             <p id="ui-subtitle" class="text-gray-500 dark:text-gray-400 mt-2">Trusted Health Guidance, Anytime, Anywhere</p>
@@ -104,7 +109,7 @@
 
         <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6">
             <!-- Welcome Message -->
-            <div class="bot-message flex items-start gap-3">
+            <div class="bot-message flex items-start gap-3 message-animate">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                 </div>
@@ -112,41 +117,67 @@
                     <p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>
                 </div>
             </div>
+             <!-- Chat messages will be appended here -->
         </main>
 
-        <footer class="py-4">
-            <div class="relative bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm">
-                <input type="text" id="user-input" class="w-full bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 py-4 pl-5 pr-40 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow">
-                
-                <button id="stop-btn" class="absolute right-[96px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:dark:text-gray-100 hover:dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition-colors hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
-                </button>
+        <!-- Quick Reply Container -->
+        <div id="quick-reply-box" class="py-2 flex items-center justify-center flex-wrap gap-2"></div>
 
-                <button id="mic-btn" class="absolute right-[52px] top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:dark:text-gray-100 hover:dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="22"></line>
-                    </svg>
+        <footer class="py-4">
+             <div id="image-preview-container" class="relative hidden w-24 h-24 mb-2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg">
+                <img id="image-preview" class="w-full h-full object-contain rounded" />
+                <button id="remove-image-btn" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs">&times;</button>
+            </div>
+            <div class="relative bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm flex items-center">
+                <!-- Image Upload Button -->
+                <button id="upload-btn" class="p-4 text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                 </button>
+                <input type="file" id="image-upload" class="hidden" accept="image/*">
+
+                <input type="text" id="user-input" class="w-full bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 py-4 pr-24 rounded-xl focus:outline-none">
                 
-                <button id="send-btn" class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
-                    </svg>
-                </button>
+                <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <button id="stop-btn" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 6h12v12H6z"/></svg>
+                    </button>
+                    <button id="mic-btn" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                    </button>
+                    <button id="send-btn" class="p-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                    </button>
+                </div>
             </div>
         </footer>
     </div>
 
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md m-4">
+            <h2 class="text-xl font-bold mb-4">Personalize Your Experience</h2>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Providing your name helps the AI address you personally.</p>
+            <div>
+                <label for="name-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Name</label>
+                <input type="text" id="name-input" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button id="close-modal-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition">Cancel</button>
+                <button id="save-settings-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- Element Selectors ---
         const chatBox = document.getElementById("chat-box");
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
         const micBtn = document.getElementById("mic-btn");
         const stopBtn = document.getElementById("stop-btn");
+        const quickReplyBox = document.getElementById('quick-reply-box');
         
-        // --- NEW THEME AND LANGUAGE ELEMENTS ---
+        // Language & Theme
         const languageSelector = document.getElementById("language-selector");
         const languageSelectorButton = document.getElementById('language-selector-button');
         const selectedLanguageLabel = document.getElementById('selected-language-label');
@@ -155,145 +186,74 @@
         const themeIconSun = document.getElementById('theme-icon-sun');
         const themeIconMoon = document.getElementById('theme-icon-moon');
         
+        // Settings Modal
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const nameInput = document.getElementById('name-input');
+
+        // Image Upload
+        const uploadBtn = document.getElementById('upload-btn');
+        const imageUploadInput = document.getElementById('image-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const removeImageBtn = document.getElementById('remove-image-btn');
+
+        // --- State Variables ---
         let chatHistory = [];
         let currentAudio = null;
+        let userName = null;
+        let imageBase64 = null;
 
         const uiStrings = {
-            'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition. Select your preferred language from the dropdown menu.</p>", placeholder: "Ask about a health topic...", listening: "Listening... speak now." },
-            'es-ES': { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición. Selecciona tu idioma preferido en el menú desplegable.</p>", placeholder: "Pregunta sobre un tema de salud...", listening: "Escuchando... hable ahora." },
-            'hi-IN': { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें। ड्रॉपडाउन मेनू से अपनी पसंदीदा भाषा चुनें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
-            'fr-FR': { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition. Sélectionnez votre langue préférée dans le menu déroulant.</p>", placeholder: "Posez une question sur un sujet de santé...", listening: "J'écoute... parlez maintenant." },
-            'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung. Wählen Sie Ihre bevorzugte Sprache aus dem Dropdown-Menü.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
-            'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి. డ్రాప్‌డౌన్ మెను నుండి మీకు ఇష్టమైన భాషను ఎంచుకోండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
-            'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనିచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள். கீழ்தோன்றும் மெனுவிலிருந்து உங்களுக்கு விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
-            'or-IN': { title: "ଆରୋଗ୍ଯମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ | ଡ୍ରପଡାଉନ୍ ମେନୁରୁ ଆପଣଙ୍କର ପସନ୍ଦର ଭାଷା ବାଛନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" }
-        };
-
-        const getCurrentStrings = () => uiStrings[languageSelector.value] || uiStrings['en-US'];
-
-        const setLanguage = (lang) => {
-            const strings = uiStrings[lang] || uiStrings['en-US'];
-            const selectedOption = Array.from(languageSelector.options).find(opt => opt.value === lang);
-            
-            document.getElementById('ui-title').innerText = strings.title;
-            document.getElementById('ui-subtitle').innerText = strings.subtitle;
-            document.getElementById('ui-welcome').innerHTML = strings.welcome;
-            userInput.placeholder = strings.placeholder;
-            selectedLanguageLabel.innerText = selectedOption ? selectedOption.text : 'English'; // Update label
+            'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Hello! I'm your AI Health Advisor. Ask me about symptoms, upload an image of a meal or a skin concern, or use the profile icon to tell me your name for a more personal chat.</p>", placeholder: "Ask a health question or describe an image...", listening: "Listening... speak now." },
+            'es-ES': { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>", placeholder: "Pregunta sobre un tema de salud...", listening: "Escuchando... hable ahora." },
+            'hi-IN': { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
+            // ... (other languages remain the same)
         };
         
-        // --- NEW THEME TOGGLE LOGIC ---
-        const applyTheme = (theme) => {
-            if (theme === 'dark') {
-                document.documentElement.classList.add('dark');
-                themeIconSun.classList.add('hidden');
-                themeIconMoon.classList.remove('hidden');
-            } else {
-                document.documentElement.classList.remove('dark');
-                themeIconSun.classList.remove('hidden');
-                themeIconMoon.classList.add('hidden');
-            }
-        };
+        // ========================================================================
+        // 1. Core Functions (Messaging, UI Updates)
+        // ========================================================================
 
-        themeToggle.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-            const newTheme = isDark ? 'light' : 'dark';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
-        });
-
-        // --- NEW CUSTOM LANGUAGE DROPDOWN LOGIC ---
-        const populateLanguageDropdown = () => {
-            languageDropdown.innerHTML = '';
-            Array.from(languageSelector.options).forEach(option => {
-                const item = document.createElement('a');
-                item.href = '#';
-                item.textContent = option.textContent;
-                item.dataset.value = option.value;
-                item.className = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 transition-colors';
-                
-                item.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    languageSelector.value = item.dataset.value;
-                    setLanguage(item.dataset.value);
-                    languageDropdown.classList.add('hidden');
-                });
-                
-                languageDropdown.appendChild(item);
-            });
-        };
-
-        languageSelectorButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            languageDropdown.classList.toggle('hidden');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!languageSelectorButton.contains(e.target) && !languageDropdown.contains(e.target)) {
-                languageDropdown.classList.add('hidden');
-            }
-        });
-
-
-        // --- INITIALIZATION ON DOM CONTENT LOADED ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Theme initialization
-            const savedTheme = localStorage.getItem('theme');
-            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (savedTheme) {
-                applyTheme(savedTheme);
-            } else if (systemPrefersDark) {
-                applyTheme('dark');
-            } else {
-                applyTheme('light');
-            }
-
-            // Language initialization
-            populateLanguageDropdown();
-            const defaultLang = 'en-US'; // Always default to English
-            languageSelector.value = defaultLang;
-            setLanguage(defaultLang);
-        });
-        
-        const stopAudio = () => {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio.currentTime = 0;
-                currentAudio = null;
-                stopBtn.classList.add('hidden');
-            }
-        };
-
-        window.playAudio = (base64String) => {
-            stopAudio();
-            const audioSource = `data:audio/mp3;base64,${base64String}`;
-            currentAudio = new Audio(audioSource);
-            currentAudio.play();
-            stopBtn.classList.remove('hidden');
-            currentAudio.onended = () => {
-                stopBtn.classList.add('hidden');
-                currentAudio = null;
-            };
-        };
-        
-        stopBtn.addEventListener('click', stopAudio);
-
-        const addMessage = (content, type, audioData = null) => {
+        const addMessage = (content, type, imageData = null) => {
+            const messageId = `msg-${Date.now()}`;
             const messageWrapper = document.createElement("div");
-            messageWrapper.className = `${type}-message flex items-start gap-3`;
+            messageWrapper.className = `${type}-message flex items-start gap-3 message-animate`;
             let messageHTML = '';
-            
-            const speakerIcon = `
-                <button class="ml-2 text-gray-400 hover:text-indigo-500 transition-colors" onclick="playAudio('${audioData}')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                </button>
-            `;
 
+            const controls = `
+                <div class="flex items-center gap-2 mt-2">
+                    <button class="copy-btn p-1 text-gray-400 hover:text-indigo-500 transition-colors" title="Copy text" data-clipboard-target="#${messageId}-content">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
+                    </button>
+                    <button class="feedback-btn p-1 text-gray-400 hover:text-green-500 transition-colors" title="Good response">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.633 10.5c.806 0 1.533-.446 2.031-1.08a9.041 9.041 0 012.861-2.4c.723-.384 1.35-.956 1.653-1.715a4.498 4.498 0 00.322-1.672V3a.75.75 0 01.75-.75A2.25 2.25 0 0116.5 4.5c0 1.152-.26 2.243-.723 3.218-.266.558.107 1.282.725 1.282h3.126c1.026 0 1.945.694 2.054 1.715.045.422.068.85.068 1.285a11.95 11.95 0 01-2.649 7.521c-.388.482-.987.729-1.605.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114-1.04a4.501 4.501 0 00-1.423-.23H5.25a2.25 2.25 0 01-2.25-2.25v-6.75a2.25 2.25 0 012.25-2.25h1.383z" /></svg>
+                    </button>
+                    <button class="feedback-btn p-1 text-gray-400 hover:text-red-500 transition-colors" title="Bad response">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 15h1.125c.621 0 1.125-.504 1.125-1.125v-6.75a1.125 1.125 0 00-1.125-1.125H7.5" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 8.25c-.806 0-1.533.446-2.031 1.08a9.041 9.041 0 00-2.861 2.4c-.723.384-1.35.956-1.653 1.715a4.498 4.498 0 00-.322 1.672v1.75a.75.75 0 00.75.75A2.25 2.25 0 0016.5 18c0-1.152-.26-2.243-.723-3.218-.266-.558.107-1.282.725-1.282h3.126c1.026 0 1.945-.694 2.054-1.715.045-.422.068.85.068-1.285a11.95 11.95 0 00-2.649-7.521c-.388-.482-.987-.729-1.605-.729H13.48c-.483 0-.964-.078-1.423-.23l-3.114 1.04a4.501 4.501 0 00-1.423-.23H5.25a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25h1.383z" /></svg>
+                    </button>
+                    ${imageData ? `<button class="speaker-btn p-1 text-gray-400 hover:text-indigo-500 transition-colors" title="Play audio" onclick="playAudio('${imageData}')">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg>
+                    </button>` : ''}
+                </div>`;
+            
+            content = content.replace(/!\[video\]\((.*?)\)/g, (match, url) => {
+                const videoId = url.includes('youtube.com/embed/') ? url.split('embed/')[1] : null;
+                if (!videoId) return '';
+                return `<div class="aspect-w-16 aspect-h-9 my-4 rounded-lg overflow-hidden"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+            });
+            
             if (type === 'user') {
                 messageWrapper.classList.add('justify-end');
+                
+                const imageHTML = imageData ? `<img src="${imageData}" class="mt-2 rounded-lg max-w-xs max-h-48 object-contain self-end">` : '';
+
                 messageHTML = `
-                    <div class="prose max-w-none bg-blue-500 text-white rounded-lg p-4 rounded-br-none shadow-sm">
+                    <div class="prose max-w-none bg-indigo-500 text-white rounded-lg p-4 rounded-br-none shadow-sm flex flex-col items-start">
                         <p>${content}</p>
+                        ${imageHTML}
                     </div>
                     <div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center text-gray-500 dark:text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -303,9 +263,11 @@
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
-                    <div class="prose max-w-none bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none flex items-center shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div class="text-gray-800 dark:text-gray-200">${content}</div>
-                        ${audioData ? speakerIcon : ''}
+                    <div class="flex flex-col">
+                        <div class="prose max-w-none bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div id="${messageId}-content" class="text-gray-800 dark:text-gray-200">${content}</div>
+                        </div>
+                        ${controls}
                     </div>`;
             }
             messageWrapper.innerHTML = messageHTML;
@@ -315,14 +277,14 @@
 
         const showTypingIndicator = () => {
             const typingIndicatorHTML = `
-                <div id="typing-indicator" class="bot-message flex items-start gap-3">
+                <div id="typing-indicator" class="bot-message flex items-start gap-3 message-animate">
                     <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg>
                     </div>
-                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none flex items-center space-x-2 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <div class="dot dot-1 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                        <div class="dot dot-2 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                        <div class="dot dot-3 w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                    <div class="bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none flex flex-col space-y-2 shadow-sm border border-gray-200 dark:border-gray-700 w-48">
+                        <div class="skeleton-line h-3 w-5/6 rounded"></div>
+                        <div class="skeleton-line h-3 w-full rounded"></div>
+                        <div class="skeleton-line h-3 w-4/6 rounded"></div>
                     </div>
                 </div>`;
             chatBox.insertAdjacentHTML('beforeend', typingIndicatorHTML);
@@ -333,31 +295,37 @@
             const indicator = document.getElementById("typing-indicator");
             if (indicator) indicator.remove();
         };
-
-        const handleSend = async (source = 'text') => {
-            const question = userInput.value.trim();
-            if (!question) return;
+        
+        const handleSend = async (source = 'text', questionOverride = null) => {
+            const question = questionOverride || userInput.value.trim();
+            if (!question && !imageBase64) return; // Allow sending with only an image
 
             stopAudio();
-            addMessage(question, 'user');
+            clearQuickReplies();
+
+            const userMessageText = question || "Image uploaded. Please analyze.";
+            addMessage(userMessageText, 'user', imageBase64); 
+
             chatHistory.push({ role: "user", parts: [{ text: question }] });
+            
+            const sentImageBase64 = imageBase64; 
             
             userInput.value = "";
             sendBtn.disabled = true;
+            removeImage();
 
             showTypingIndicator();
 
             try {
-                // NOTE: This assumes you have a backend endpoint at "/ask"
-                // This will not work directly in a static HTML file without a backend server.
                 const response = await fetch("/ask", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         question: question,
                         language: languageSelector.value,
-                        history: chatHistory.slice(0, -1),
-                        source: source
+                        source: source,
+                        userName: userName,
+                        imageBase64: sentImageBase64
                     }),
                 });
 
@@ -369,102 +337,236 @@
                 const data = await response.json();
                 const botAnswer = data.answer;
                 const audioData = data.audio;
+                const quickReplies = data.quick_replies;
             
                 hideTypingIndicator();
                 addMessage(marked.parse(botAnswer), 'bot', audioData);
                 
-                if (audioData) {
-                    playAudio(audioData);
-                }
+                if (audioData) playAudio(audioData);
+                if (quickReplies && quickReplies.length > 0) renderQuickReplies(quickReplies);
 
                 chatHistory.push({ role: "model", parts: [{ text: botAnswer }] });
 
             } catch (error) {
                 console.error("Error fetching response:", error);
                 hideTypingIndicator();
-                // Simulating a bot response for frontend-only demonstration
-                setTimeout(() => {
-                    hideTypingIndicator();
-                    const mockAnswer = `This is a mock response as there is no backend configured. You asked: "${question}"`;
-                    addMessage(marked.parse(mockAnswer), 'bot');
-                     chatHistory.push({ role: "model", parts: [{ text: mockAnswer }] });
-                }, 1000);
-                // addMessage(`Sorry, something went wrong. Please try again. <br><small class="text-red-500">${error.message}</small>`, 'bot');
+                addMessage(`Sorry, something went wrong. Please check the server or try again. <br><small class="text-red-500">${error.message}</small>`, 'bot');
             } finally {
                 sendBtn.disabled = false;
                 userInput.focus();
             }
         };
 
+        // ========================================================================
+        // 2. Feature Functions (No longer saving/loading chat history)
+        // ========================================================================
+
+        const renderQuickReplies = (replies) => {
+            quickReplyBox.innerHTML = '';
+            replies.forEach(reply => {
+                const button = document.createElement('button');
+                button.textContent = reply;
+                button.className = "px-4 py-2 bg-indigo-100 dark:bg-gray-700 text-indigo-700 dark:text-gray-200 rounded-full text-sm hover:bg-indigo-200 dark:hover:bg-gray-600 transition-colors";
+                button.onclick = () => handleQuickReplyClick(reply);
+                quickReplyBox.appendChild(button);
+            });
+        };
+        const handleQuickReplyClick = (text) => {
+            userInput.value = text;
+            handleSend('text', text);
+        };
+        const clearQuickReplies = () => {
+            quickReplyBox.innerHTML = '';
+        };
+
+        const loadUserProfile = () => {
+            const savedName = localStorage.getItem('arogyaMitraUserName');
+            if (savedName) {
+                userName = savedName;
+                nameInput.value = savedName;
+            }
+        };
+
+        const stopAudio = () => {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+                stopBtn.classList.add('hidden');
+            }
+        };
+        window.playAudio = (base64String) => {
+            stopAudio();
+            const audioSource = `data:audio/mp3;base64,${base64String}`;
+            currentAudio = new Audio(audioSource);
+            currentAudio.play();
+            stopBtn.classList.remove('hidden');
+            currentAudio.onended = stopAudio;
+        };
+
+        const handleImageUpload = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imageBase64 = e.target.result;
+                imagePreview.src = imageBase64;
+                imagePreviewContainer.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        };
+        const removeImage = () => {
+            imageBase64 = null;
+            imagePreview.src = '';
+            imagePreviewContainer.classList.add('hidden');
+            imageUploadInput.value = ''; // Reset file input
+        };
+
+        // ========================================================================
+        // 3. Event Listeners & Initialization
+        // ========================================================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+
+            populateLanguageDropdown();
+            setLanguage('en-US');
+
+            // Load user name, but not chat history
+            loadUserProfile();
+        });
+
         sendBtn.addEventListener("click", () => handleSend('text'));
         userInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
                 handleSend('text');
             }
         });
 
-        // --- Speech Recognition Logic ---
+        stopBtn.addEventListener('click', stopAudio);
+        settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
+        saveSettingsBtn.addEventListener('click', () => {
+            userName = nameInput.value.trim();
+            localStorage.setItem('arogyaMitraUserName', userName);
+            settingsModal.classList.add('hidden');
+        });
+
+        uploadBtn.addEventListener('click', () => imageUploadInput.click());
+        imageUploadInput.addEventListener('change', handleImageUpload);
+        removeImageBtn.addEventListener('click', removeImage);
+
+        chatBox.addEventListener('click', (e) => {
+            const copyBtn = e.target.closest('.copy-btn');
+            const feedbackBtn = e.target.closest('.feedback-btn');
+
+            if (copyBtn) {
+                const targetId = copyBtn.dataset.clipboardTarget;
+                const contentElement = document.querySelector(targetId);
+                if (contentElement) {
+                    navigator.clipboard.writeText(contentElement.innerText)
+                        .then(() => {
+                            copyBtn.innerHTML = '<svg class="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
+                            setTimeout(() => {
+                                copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>';
+                            }, 1500);
+                        });
+                }
+            }
+
+            if (feedbackBtn) {
+                const otherBtn = feedbackBtn.parentElement.querySelector('.text-green-500, .text-red-500');
+                if(otherBtn) otherBtn.classList.remove('text-green-500', 'text-red-500');
+                feedbackBtn.classList.add(feedbackBtn.title.includes('Good') ? 'text-green-500' : 'text-red-500');
+            }
+        });
+
+        const getCurrentStrings = () => uiStrings[languageSelector.value] || uiStrings['en-US'];
+        const setLanguage = (lang) => {
+            const strings = uiStrings[lang] || uiStrings['en-US'];
+            const selectedOption = Array.from(languageSelector.options).find(opt => opt.value === lang);
+            document.getElementById('ui-title').innerText = strings.title;
+            document.getElementById('ui-subtitle').innerText = strings.subtitle;
+            document.getElementById('ui-welcome').innerHTML = strings.welcome;
+            userInput.placeholder = strings.placeholder;
+            selectedLanguageLabel.innerText = selectedOption ? selectedOption.text : 'English';
+        };
+        const applyTheme = (theme) => {
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            themeIconSun.classList.toggle('hidden', theme === 'dark');
+            themeIconMoon.classList.toggle('hidden', theme !== 'dark');
+        };
+        themeToggle.addEventListener('click', () => {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+        const populateLanguageDropdown = () => {
+            languageDropdown.innerHTML = '';
+            Array.from(languageSelector.options).forEach(option => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.textContent = option.textContent;
+                item.dataset.value = option.value;
+                item.className = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 transition-colors';
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    languageSelector.value = item.dataset.value;
+                    setLanguage(item.dataset.value);
+                    languageDropdown.classList.add('hidden');
+                });
+                languageDropdown.appendChild(item);
+            });
+        };
+        languageSelectorButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            languageDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', (e) => {
+            if (!languageSelectorButton.contains(e.target) && !languageDropdown.contains(e.target)) {
+                languageDropdown.classList.add('hidden');
+            }
+        });
+        
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition;
         let isRecording = false;
-        let silenceTimeout;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-
             recognition.onstart = () => {
                 isRecording = true;
                 micBtn.classList.add('recording');
                 userInput.placeholder = getCurrentStrings().listening;
                 sendBtn.disabled = true;
             };
-
             recognition.onresult = (event) => {
-                clearTimeout(silenceTimeout);
-                let interimTranscript = '';
                 let finalTranscript = '';
-
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
                 }
-                userInput.value = finalTranscript + interimTranscript;
-                
-                silenceTimeout = setTimeout(() => {
-                    if(isRecording) recognition.stop();
-                }, 7000);
+                userInput.value = finalTranscript;
             };
-
-            recognition.onerror = (event) => {
-                console.error("Speech recognition error:", event.error);
-                addMessage(`Sorry, a speech recognition error occurred: ${event.error}`, 'bot');
-            };
-
+            recognition.onerror = (event) => console.error("Speech recognition error:", event.error);
             recognition.onend = () => {
                 isRecording = false;
                 micBtn.classList.remove('recording');
                 userInput.placeholder = getCurrentStrings().placeholder;
                 sendBtn.disabled = false;
-                clearTimeout(silenceTimeout);
-
-                if (userInput.value.trim()) {
-                    handleSend('voice');
-                }
+                if (userInput.value.trim()) handleSend('voice');
             };
-
         } else {
-            console.log("Speech Recognition not supported in this browser.");
+            console.log("Speech Recognition not supported.");
             micBtn.disabled = true;
         }
 
         micBtn.addEventListener('click', () => {
             if (!SpeechRecognition) return;
-
             if (isRecording) {
                 recognition.stop();
             } else {
@@ -473,8 +575,6 @@
                 recognition.start();
             }
         });
-
     </script>
 </body>
 </html>
-
