@@ -78,25 +78,25 @@
                     </button>
                     <!-- Language Selector -->
                      <div class="relative">
-                        <select id="language-selector" class="hidden">
-                            <option value="en-US">English</option>
-                            <option value="es-ES">Español</option>
-                            <option value="hi-IN">हिन्दी</option>
-                            <option value="fr-FR">Français</option>
-                            <option value="de-DE">Deutsch</option>
-                            <option value="te-IN">తెలుగు</option>
-                            <option value="ta-IN">தமிழ்</option>
-                            <option value="or-IN">ଓଡିଆ</option>
-                        </select>
-                        <button id="language-selector-button" class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 p-2.5 transition-colors">
-                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                            <span id="selected-language-label" class="font-medium">English</span>
-                             <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                        </button>
-                        <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-10">
-                            <!-- Options are populated by JS -->
-                        </div>
-                    </div>
+                         <select id="language-selector" class="hidden">
+                             <option value="en-US">English</option>
+                             <option value="es-ES">Español</option>
+                             <option value="hi-IN">हिन्दी</option>
+                             <option value="fr-FR">Français</option>
+                             <option value="de-DE">Deutsch</option>
+                             <option value="te-IN">తెలుగు</option>
+                             <option value="ta-IN">தமிழ்</option>
+                             <option value="or-IN">ଓଡିଆ</option>
+                         </select>
+                         <button id="language-selector-button" class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 p-2.5 transition-colors">
+                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                             <span id="selected-language-label" class="font-medium">English</span>
+                              <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                         </button>
+                         <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-10">
+                             <!-- Options are populated by JS -->
+                         </div>
+                     </div>
                 </div>
             </div>
             <p id="ui-subtitle" class="text-gray-500 dark:text-gray-400 mt-2">Trusted Health Guidance, Anytime, Anywhere</p>
@@ -159,14 +159,14 @@
         let currentAudio = null;
 
         const uiStrings = {
-            'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition.</p>", placeholder: "Ask about a health topic...", listening: "Listening... speak now." },
-            'es-ES': { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>", placeholder: "Pregunta sobre un tema de salud...", listening: "Escuchando... hable ahora." },
-            'hi-IN': { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
-            'fr-FR': { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>", placeholder: "Posez une question sur un sujet de santé...", listening: "J'écoute... parlez maintenant." },
-            'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
-            'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
-            'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనিచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகুறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
-            'or-IN': { title: "ଆରୋଗ୍ଯମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" }
+            'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Welcome. I'm your AI Health Advisor. Ask me anything about symptoms, conditions, fitness, or nutrition. Select your preferred language from the dropdown menu.</p>", placeholder: "Ask about a health topic...", listening: "Listening... speak now." },
+            'es-ES': { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición. Selecciona tu idioma preferido en el menú desplegable.</p>", placeholder: "Pregunta sobre un tema de salud...", listening: "Escuchando... hable ahora." },
+            'hi-IN': { title: "आरोग्यमित्र AI", subtitle: "आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें। ड्रॉपडाउन मेनू से अपनी पसंदीदा भाषा चुनें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
+            'fr-FR': { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition. Sélectionnez votre langue préférée dans le menu déroulant.</p>", placeholder: "Posez une question sur un sujet de santé...", listening: "J'écoute... parlez maintenant." },
+            'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung. Wählen Sie Ihre bevorzugte Sprache aus dem Dropdown-Menü.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
+            'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి. డ్రాప్‌డౌన్ మెను నుండి మీకు ఇష్టమైన భాషను ఎంచుకోండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
+            'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనିచేசే சுகாதార వளম்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள். கீழ்தோன்றும் மெனுவிலிருந்து உங்களுக்கு விருப்பமான மொழியைத் தேர்ந்தெடுக்கவும்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
+            'or-IN': { title: "ଆରୋଗ୍ଯମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାଗତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ | ଡ୍ରପଡାଉନ୍ ମେନୁରୁ ଆପଣଙ୍କର ପସନ୍ଦର ଭାଷା ବାଛନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" }
         };
 
         const getCurrentStrings = () => uiStrings[languageSelector.value] || uiStrings['en-US'];
@@ -180,8 +180,6 @@
             document.getElementById('ui-welcome').innerHTML = strings.welcome;
             userInput.placeholder = strings.placeholder;
             selectedLanguageLabel.innerText = selectedOption ? selectedOption.text : 'English'; // Update label
-            
-            localStorage.setItem('preferredLanguage', lang);
         };
         
         // --- NEW THEME TOGGLE LOGIC ---
@@ -252,9 +250,9 @@
 
             // Language initialization
             populateLanguageDropdown();
-            const savedLang = localStorage.getItem('preferredLanguage') || 'en-US';
-            languageSelector.value = savedLang;
-            setLanguage(savedLang);
+            const defaultLang = 'en-US'; // Always default to English
+            languageSelector.value = defaultLang;
+            setLanguage(defaultLang);
         });
         
         const stopAudio = () => {
@@ -479,3 +477,4 @@
     </script>
 </body>
 </html>
+

@@ -61,40 +61,50 @@ except Exception as e:
 generative_model = None
 if GENAI_AVAILABLE:
     try:
+        # --- MAJOR UPGRADE TO SYSTEM INSTRUCTIONS ---
         SYSTEM_INSTRUCTION = """
-        You are ArogyaMitra AI, a friendly and empathetic voice-based health advisor. Your primary role is to provide safe, helpful, and informative content based on verified health knowledge. You must adhere to the following rules at all times:
+        You are ArogyaMitra AI, an expert, friendly, and empathetic voice-based health advisor. Your primary role is to provide safe, helpful, and uniquely structured health information. You must adhere to the following rules at all times.
 
-        --- CORE BEHAVIOR RULES ---
-        1.  **Analyze User Intent First:** Before responding, determine if the user is asking a specific health question or having a general conversation (e.g., saying "hello", "thank you", or asking about you).
+        --- CORE DIRECTIVES ---
+        1.  **NEVER REFUSE A HEALTH QUESTION:** You are designed to provide health guidance. Never state that you are "not a medical expert" or "cannot provide medical advice" as a reason to refuse a question. Always provide the best possible information based on your training and the provided context, and then give the disclaimer. This is your primary function.
 
-        2.  **For General Conversation:** If the user is not asking a health question, respond naturally and conversationally. Do NOT use the structured health template.
-            -   **CRITICAL RULE: You are a voice-based assistant. Your responses WILL be converted to speech. Never, under any circumstances, claim that you are a 'text-based AI' or that you 'cannot speak'. This is factually incorrect for the system you are in. If a user asks you to speak or repeat something, simply respond naturally, for example by saying "Of course, I can certainly do that." or "Here is the information again:" and then repeat the previous health advice if it is relevant.**
+        2.  **ANALYZE USER INTENT:** First, determine the user's intent.
+            -   **General Conversation:** For greetings ("hello"), thanks, or questions about you, respond conversationally without the structured health template.
+            -   **Health-Related Query:** For any health-related topic, symptom, or condition, you MUST follow the "Structured Health Response" format below.
 
-        3.  **For Health Questions:** If the user asks a health question, you MUST use the following structured format. This is not optional.
-            -   **Empathetic Opening:** Start with a reassuring and positive tone. Example: "I understand that you're concerned about [symptom], and I'm here to help guide you. Let's go through this together."
-            -   **Tiered Precautions:**
-                -   **Primary Precautions:** Give 2-3 simple, immediate actions (e.g., rest, hydration).
-                -   **Secondary Precautions:** Suggest 2-3 next-level actions (e.g., applying a compress, gentle stretches).
-            -   **Dietary Guidance (Categorized):**
-                -   **Foods to Include:** Separate suggestions for 'Vegetarian' and 'Non-Vegetarian'.
-                -   **Foods to Avoid:** Separate suggestions for 'Vegetarian' and 'Non-Vegetarian'.
-            -   **Warning Signs (Peak Stage Symptoms):** List critical symptoms that require immediate attention.
-            -   **When to See a Doctor:** Clearly state when professional medical help is necessary and suggest the type of specialist to consult (e.g., cardiologist, neurologist, primary care physician).
-            -   **Polite Disclaimer:** End with: "Please remember, I am an AI assistant and this information is not a substitute for professional medical advice."
-            -   **Engaging Follow-up Question:** Ask a question to continue the conversation. Example: "Would you like me to elaborate on any of these points, such as the dietary suggestions or the precautions?"
+        3.  **CLARIFICATION BEFORE ADVICE (CRITICAL FIRST STEP for Health Queries):**
+            -   Before giving any advice, you MUST first ask the user for clarification. Ask: "Before I provide information on that, could you please tell me if this is a symptom you are currently experiencing, or are you asking out of general curiosity?"
+            -   Base the tone of your subsequent response on their answer. If they are experiencing it, be more empathetic. If they are curious, be more informative.
 
-        4.  **Handle Ambiguity and Errors:**
-            -   If a user's query is misspelled, incomplete, or ambiguous (e.g., the Telugu word 'kallu' meaning 'eyes' or 'legs'), you MUST ask for clarification before providing a health response. Do not guess. Example: "I see you mentioned 'kallu.' In Telugu, that can mean either 'eyes' or 'legs.' Could you please clarify which one you are referring to so I can provide the most accurate information?"
+        4.  **STRUCTURED HEALTH RESPONSE (MANDATORY TEMPLATE):** After clarifying, you must structure your response using these exact sections in this exact order.
 
-        5.  **Information Verification:**
-            -   Your primary source of information is the context provided from the RAG system (the medical book). State when your information comes from this source.
-            -   If no context is found in the book, you may use your general knowledge but you MUST state that the information is from your general training and should be verified with a healthcare professional.
+            -   **A. Empathetic Opening:** Start with a positive and reassuring tone. Acknowledge their concern. Example: "I understand that dealing with [symptom] can be worrying, but please don't worry, I'm here to provide some clear information and guidance."
+
+            -   **B. Primary Precautions:** List 2-3 simple, immediate actions. Use clear, easy-to-understand language. (e.g., rest, hydration, avoiding certain activities).
+
+            -   **C. Secondary Precautions:** List 2-3 next-level actions or remedies. (e.g., applying a cold compress, gentle stretches, over-the-counter aids).
+
+            -   **D. Dietary Guidance (MUST be Categorized):**
+                -   **Foods to Include (Vegetarian):** Provide specific vegetarian food items.
+                -   **Foods to Include (Non-Vegetarian):** Provide specific non-vegetarian food items.
+                -   **Foods to Avoid (Vegetarian):** List specific vegetarian foods/ingredients to avoid.
+                -   **Foods to Avoid (Non-Vegetarian):** List specific non-vegetarian foods/ingredients to avoid.
+
+            -   **E. Peak Stage Symptoms (Warning Signs):** Clearly list critical symptoms that indicate the condition is worsening and requires immediate attention.
+
+            -   **F. When to Consult a Doctor:** State the conditions under which a person should see a doctor. Crucially, you MUST suggest the type of specialist to consult (e.g., "You should see a General Physician, who might refer you to a Dermatologist," or "It would be best to consult a Cardiologist directly.").
+
+            -   **G. Polite Disclaimer:** End with this exact phrase, or a very close and polite variation: "Please remember, this information is for guidance and is not a substitute for professional medical advice from a qualified doctor."
+
+            -   **H. Engaging Follow-up:** Ask a question to encourage further interaction. Example: "Would you like me to elaborate on any of these points, such as the dietary suggestions or the specific precautions?" If the user says "yes" without specifying, provide a more detailed briefing on the entire topic.
+
+        5.  **VOICE-FIRST IDENTITY:** You are a voice-based assistant. Your responses WILL be converted to speech. Never claim you are a 'text-based AI' or that you 'cannot speak'.
         """
         generative_model = genai.GenerativeModel(
             GENERATIVE_MODEL,
             system_instruction=SYSTEM_INSTRUCTION
         )
-        print("Generative model initialized successfully.")
+        print("Generative model initialized successfully with upgraded instructions.")
     except Exception as e:
         print(f"Could not initialize generative model: {e}")
         GENAI_AVAILABLE = False
@@ -104,26 +114,34 @@ if GENAI_AVAILABLE:
 # 3. Helper Functions
 # ==============================================================================
 
-# --- FIX: Updated keys to match the frontend values (e.g., 'en-US') ---
+# --- EXPANDED AND REORDERED LANGUAGE MAPS ---
 VOICE_MAP = {
     "en-US": "en-US-AriaNeural",
-    "es-ES": "es-ES-ElviraNeural",
     "hi-IN": "hi-IN-SwaraNeural",
-    "fr-FR": "fr-FR-DeniseNeural",
-    "de-DE": "de-DE-KatjaNeural",
     "te-IN": "te-IN-ShrutiNeural",
     "ta-IN": "ta-IN-PallaviNeural",
-    "or-IN": "or-IN-AshaNeural"
+    "bn-IN": "bn-IN-TanishaaNeural", # Bengali
+    "mr-IN": "mr-IN-AarohiNeural",   # Marathi
+    "gu-IN": "gu-IN-DhwaniNeural",   # Gujarati
+    "kn-IN": "kn-IN-SapnaNeural",    # Kannada
+    "or-IN": "or-IN-AshaNeural",
+    "es-ES": "es-ES-ElviraNeural",
+    "fr-FR": "fr-FR-DeniseNeural",
+    "de-DE": "de-DE-KatjaNeural",
 }
 LANGUAGE_MAP = {
     "en-US": "English",
-    "es-ES": "Spanish",
     "hi-IN": "Hindi",
-    "fr-FR": "French",
-    "de-DE": "German",
     "te-IN": "Telugu",
     "ta-IN": "Tamil",
-    "or-IN": "Odia"
+    "bn-IN": "Bengali",
+    "mr-IN": "Marathi",
+    "gu-IN": "Gujarati",
+    "kn-IN": "Kannada",
+    "or-IN": "Odia",
+    "es-ES": "Spanish",
+    "fr-FR": "French",
+    "de-DE": "German",
 }
 
 def find_best_chunks(question, top_k=3):
@@ -184,9 +202,8 @@ def ask():
         user_question = data.get("question")
         language = data.get("language", "en-US")
         
-        # --- FIX: Add a check for an empty or invalid language string ---
         if not language or language not in LANGUAGE_MAP:
-            language = "en-US" # Default to English if the language is missing or not supported
+            language = "en-US"
 
         history = data.get("history", [])
         source = data.get("source", "text")
@@ -194,12 +211,9 @@ def ask():
         if not user_question:
             return jsonify({"error": "No question provided"}), 400
 
-        # --- Translate non-English questions to English for the model ---
         question_for_model = user_question
-        # FIX: More robust check to avoid translating English to English
         if not language.startswith('en'):
             try:
-                # Use the translator utility to convert the user's question to English
                 question_for_model = detect_and_translate(user_question, target_lang='en')
                 print(f"Translated question from '{language}' to 'en': '{question_for_model}'")
             except Exception as e:
@@ -214,18 +228,21 @@ def ask():
             if voice:
                 try:
                     speech_text = re.sub(r'[\*#]', '', answer)
-                    audio_base_64 = asyncio.run(generate_speech_base64(speech_text, voice=voice))
+                    # Corrected variable name from audio_base_64 to the outer scope variable
+                    audio_base64 = asyncio.run(generate_speech_base64(speech_text, voice=voice))
                 except Exception as e:
                     print(f"Error during TTS generation for language {language}: {e}")
-                    audio_base_64 = ""
+                    audio_base64 = ""
                     
-        return jsonify({"answer": answer, "audio": audio_base_64})
+        return jsonify({"answer": answer, "audio": audio_base64})
     except Exception as e:
         print(f"A critical error occurred in the /ask route: {e}")
         return jsonify({"error": "A critical server error occurred. Please check the backend logs for details."}), 500
 
 @app.route("/transcribe", methods=["POST"])
 def transcribe_route():
+    # This route is kept for potential future use but is not actively used
+    # by the Web Speech API flow in the frontend.
     if 'audio_data' not in request.files:
         return jsonify({"error": "No audio file provided"}), 400
     
