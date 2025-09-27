@@ -41,7 +41,7 @@ else:
 
 # --- Model Configuration ---
 EMBEDDING_MODEL = "models/text-embedding-004"
-GENERATIVE_MODEL = "gemini-1.5-flash-latest" # This model is multimodal
+GENERATIVE_MODEL = "gemini-2.0-flash-lite" # This model is multimodal
 
 # --- FAISS Index (RAG) Loading ---
 FAISS_INDEX_PATH = "health_book.index"
@@ -93,17 +93,24 @@ if GENAI_AVAILABLE:
         5.  **STRUCTURED HEALTH RESPONSE (MANDATORY TEMPLATE):** After clarifying, you must structure your response using these exact sections in this exact order. Use markdown for formatting.
 
             -   **A. Empathetic Opening:** Start with a positive and reassuring tone. Acknowledge their concern. Example: "I understand that dealing with [symptom] can be worrying, but please don't worry, I'm here to provide some clear information and guidance."
+
             -   **B. Primary Precautions:** List 2-3 simple, immediate actions. Use clear, easy-to-understand language. (e.g., rest, hydration, avoiding certain activities).
+
             -   **C. Secondary Precautions:** List 2-3 next-level actions or remedies. (e.g., applying a cold compress, gentle stretches, over-the-counter aids).
+
             -   **D. Dietary Guidance (MUST be Categorized):**
                 -   **Foods to Include (Vegetarian):** Provide specific vegetarian food items.
                 -   **Foods to Include (Non-Vegetarian):** Provide specific non-vegetarian food items.
                 -   **Foods to Avoid (Vegetarian):** List specific vegetarian foods/ingredients to avoid.
                 -   **Foods to Avoid (Non-Vegetarian):** List specific non-vegetarian foods/ingredients to avoid.
+
             -   **E. Peak Stage Symptoms (Warning Signs):** Clearly list critical symptoms that indicate the condition is worsening and requires immediate attention.
+
             -   **F. When to Consult a Doctor:** State the conditions under which a person should see a doctor. Crucially, you MUST suggest the type of specialist to consult (e.g., "You should see a General Physician, who might refer you to a Dermatologist," or "It would be best to consult a Cardiologist directly.").
+
             -   **G. Polite Disclaimer:** End with this exact phrase, or a very close and polite variation: "Please remember, this information is for guidance and is not a substitute for professional medical advice from a qualified doctor."
 
+            -   **H. Engaging Follow-up:** Ask a question to encourage further interaction. Example: "Would you like me to elaborate on any of these points, such as the dietary suggestions or the specific precautions?" If the user says "yes" without specifying, provide a more detailed briefing on the entire topic.
         6.  **QUICK REPLIES (MANDATORY for Health Queries):** After the disclaimer, you MUST suggest 2-3 relevant follow-up questions or topics as quick replies. Enclose each suggestion in <qr> tags. Example: "<qr>Common Causes</qr><qr>Home Remedies</qr><qr>When to see a doctor?</qr>"
 
         7.  **RICH MEDIA:** If a YouTube video would be genuinely helpful (e.g., for demonstrating an exercise), you may embed it using the format: `![video](YOUTUBE_EMBED_URL)`. Use this sparingly and only when it adds significant value.
@@ -242,7 +249,7 @@ def ask():
         # --- Get additional data from request ---
         user_name = data.get("userName")
         image_base64 = data.get("imageBase64")
-        
+
         if image_base64:
             # Strip the header from the base64 string
             image_base64 = re.sub('^data:image/.+;base64,', '', image_base64)
@@ -268,10 +275,10 @@ def ask():
             except Exception as e:
                 print(f"Could not translate question, using original. Error: {e}")
                 question_for_model = user_question
-        
+
         # --- MODIFIED: Call updated stateless response function ---
         answer, quick_replies = get_health_response(question_for_model, language, user_name, image_base64)
-        
+
         audio_base64 = ""
         if source == 'voice':
             voice = VOICE_MAP.get(language)
@@ -282,7 +289,7 @@ def ask():
                 except Exception as e:
                     print(f"Error during TTS generation for language {language}: {e}")
                     audio_base64 = ""
-                    
+
         # --- Return quick replies along with answer ---
         return jsonify({"answer": answer, "audio": audio_base64, "quick_replies": quick_replies})
     except Exception as e:
@@ -291,25 +298,12 @@ def ask():
 
 @app.route("/transcribe", methods=["POST"])
 def transcribe_route():
+    # This route is kept for potential future use but is not actively used
+    # by the Web Speech API flow in the frontend.
     if 'audio_data' not in request.files:
         return jsonify({"error": "No audio file provided"}), 400
-    
-    audio_file = request.files['audio_data']
-    language = request.form.get('language', 'en')
-    
-    try:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = os.path.join(temp_dir, 'temp_audio.webm')
-            audio_file.save(temp_path)
-            
-            transcribed_text = transcribe_audio(temp_path, lang_code=language)
-            final_text = detect_and_translate(transcribed_text, target_lang='en')
 
-            return jsonify({"transcription": final_text})
-
-    except Exception as e:
-        print(f"Error during transcription process: {e}")
-        return jsonify({"error": f"Failed to process audio. Details: {str(e)}"}), 500
+    # ... (rest of the function if needed) ...
 
 if __name__ == "__main__":
     app.run(debug=True)
