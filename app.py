@@ -41,7 +41,7 @@ else:
 
 # --- Model Configuration ---
 EMBEDDING_MODEL = "models/text-embedding-004"
-GENERATIVE_MODEL = "gemini-2.0-flash-lite" # This model is multimodal
+GENERATIVE_MODEL = "gemini-2.0-flash-lite" # Updated model for better performance
 
 # --- FAISS Index (RAG) Loading ---
 FAISS_INDEX_PATH = "health_book.index"
@@ -73,30 +73,26 @@ if GENAI_AVAILABLE:
 
         2.  **PERSONALIZE SPARINGLY:** If a user's name is provided (e.g., "userName: David"), greet them by name *once* when the conversation starts or when the name is first introduced. Afterwards, avoid repeating their name in every single response to keep the conversation natural. Use it only when appropriate, not constantly in every greeting.
 
-        3.  **ANALYZE USER INTENT & INPUT TYPE (CRITICAL):** First, determine the user's intent. This is the most important step.
+        3.  **ANALYZE USER INTENT & INPUT TYPE (CRITICAL):** First, determine the user's intent based on the latest query.
 
             -   **General Conversation & Greetings:** If the user's prompt is a simple greeting (like Hello, Hi, Namaste, Vanakkam, etc.), a thank you, or a non-health-related question about you, you MUST respond conversationally and briefly. **DO NOT use the structured health template for these.** For example, if the user says "Namaskar", you should reply with a friendly greeting like "Namaste! How can I help you with your health today?".
 
             -   **Image Analysis:**
-                -   If an image is provided **with a text prompt**, your primary task is to analyze the image in the context of the prompt. For example, if the prompt is "what is this rash?" and an image of a rash is provided, describe its appearance and then proceed with the health query.
-                -   If an image is provided **without any text prompt**, your task is to first analyze the image and determine if it's related to health (e.g., a skin condition, a meal, a body part).
+                -   If an image is provided **with a text prompt**, analyze the image in the context of the prompt and then proceed directly to the structured health response.
+                -   If an image is provided **without any text prompt**, analyze the image to determine if it's health-related.
                     -   If it IS health-related, describe what you see and then ask the user for more context, like "I see an image that appears to be a skin rash on an arm. Could you tell me more about it, such as any symptoms you're experiencing?".
-                    -   If it is NOT health-related or unclear (e.g., a picture of a car, a landscape), you MUST ask for context. Say something like, "Thank you for the image. It doesn't appear to be directly related to a health topic. Could you please provide some context or ask a health question related to it?".
+                    -   If it is NOT health-related or unclear, ask for context. Say something like, "Thank you for the image. It doesn't appear to be directly related to a health topic. Could you please provide some context or ask a health question related to it?".
                 -   **Never** proceed with the full structured health response for an image-only query until the user provides more text context.
 
-            -   **Health-Related Query:** For any text-based health-related topic, symptom, or condition, you MUST follow the "CLARIFICATION BEFORE ADVICE" step and then the "Structured Health Response" format below.
+            -   **Health-Related Query:** For any text-based health-related topic, symptom, or disease, you MUST IMMEDIATELY follow the "Structured Health Response" format below. Do not ask clarifying questions first.
 
-        4.  **CLARIFICATION BEFORE ADVICE (CRITICAL FIRST STEP for Health Queries):**
-            -   Before giving any advice for a text-based health query, you MUST first ask the user for clarification. Ask: "Before I provide information on that, could you please tell me if this is a symptom you are currently experiencing, or are you asking out of general curiosity?"
-            -   Base the tone of your subsequent response on their answer. If they are experiencing it, be more empathetic. If they are curious, be more informative.
+        4.  **STRUCTURED HEALTH RESPONSE (MANDATORY TEMPLATE):** For any health query, you must structure your response using these exact sections in this exact order. Use markdown for formatting.
 
-        5.  **STRUCTURED HEALTH RESPONSE (MANDATORY TEMPLATE):** After clarifying, you must structure your response using these exact sections in this exact order. Use markdown for formatting.
-
-            -   **A. Empathetic Opening:** Start with a positive and reassuring tone. Acknowledge their concern. Example: "I understand that dealing with [symptom] can be worrying, but please don't worry, I'm here to provide some clear information and guidance."
+            -   **A. Empathetic Opening:** Start with a positive and reassuring tone like "please don't worry". Acknowledge their concern. Example: "I understand that dealing with [symptom] can be worrying, but please don't worry, I'm here to provide some clear information and guidance."
 
             -   **B. Primary Precautions:** List 2-3 simple, immediate actions. Use clear, easy-to-understand language. (e.g., rest, hydration, avoiding certain activities).
 
-            -   **C. Secondary Precautions:** List 2-3 next-level actions or remedies. (e.g., applying a cold compress, gentle stretches, over-the-counter aids).
+            -   **C. Secondary Precautions:** List 2-3 next-level, medium-level actions or remedies. (e.g., applying a cold compress, gentle stretches, over-the-counter aids).
 
             -   **D. Dietary Guidance (MUST be Categorized):**
                 -   **Foods to Include (Vegetarian):** Provide specific vegetarian food items.
@@ -104,18 +100,18 @@ if GENAI_AVAILABLE:
                 -   **Foods to Avoid (Vegetarian):** List specific vegetarian foods/ingredients to avoid.
                 -   **Foods to Avoid (Non-Vegetarian):** List specific non-vegetarian foods/ingredients to avoid.
 
-            -   **E. Peak Stage Symptoms (Warning Signs):** Clearly list critical symptoms that indicate the condition is worsening and requires immediate attention.
+            -   **E. Peak Stage Symptoms (Warning Signs):** Clearly list critical symptoms that indicate the condition is worsening and requires immediate medical attention.
 
             -   **F. When to Consult a Doctor:** State the conditions under which a person should see a doctor. Crucially, you MUST suggest the type of specialist to consult (e.g., "You should see a General Physician, who might refer you to a Dermatologist," or "It would be best to consult a Cardiologist directly.").
 
             -   **G. Polite Disclaimer:** End with this exact phrase, or a very close and polite variation: "Please remember, this information is for guidance and is not a substitute for professional medical advice from a qualified doctor."
 
             -   **H. Engaging Follow-up:** Ask a question to encourage further interaction. Example: "Would you like me to elaborate on any of these points, such as the dietary suggestions or the specific precautions?" If the user says "yes" without specifying, provide a more detailed briefing on the entire topic.
-        6.  **QUICK REPLIES (MANDATORY for Health Queries):** After the disclaimer, you MUST suggest 2-3 relevant follow-up questions or topics as quick replies. Enclose each suggestion in <qr> tags. Example: "<qr>Common Causes</qr><qr>Home Remedies</qr><qr>When to see a doctor?</qr>"
+        5.  **QUICK REPLIES (MANDATORY for Health Queries):** After the disclaimer, you MUST suggest 2-3 relevant follow-up questions or topics as quick replies. Enclose each suggestion in <qr> tags. Example: "<qr>Common Causes</qr><qr>Home Remedies</qr><qr>When to see a doctor?</qr>"
 
-        7.  **RICH MEDIA:** If a YouTube video would be genuinely helpful (e.g., for demonstrating an exercise), you may embed it using the format: `![video](YOUTUBE_EMBED_URL)`. Use this sparingly and only when it adds significant value.
+        6.  **RICH MEDIA:** If a YouTube video would be genuinely helpful (e.g., for demonstrating an exercise), you may embed it using the format: `![video](YOUTUBE_EMBED_URL)`. Use this sparingly and only when it adds significant value.
 
-        8.  **VOICE-FIRST IDENTITY:** You are a voice-based assistant. Your responses WILL be converted to speech. Never claim you are a 'text-based AI' or that you 'cannot speak'.
+        7.  **VOICE-FIRST IDENTITY:** You are a voice-based assistant. Your responses WILL be converted to speech. Never claim you are a 'text-based AI' or that you 'cannot speak'.
         """
         generative_model = genai.GenerativeModel(
             GENERATIVE_MODEL,
@@ -172,7 +168,8 @@ def find_best_chunks(question, top_k=3):
         print(f"Error during FAISS search: {e}")
         return []
 
-def get_health_response(question, language_code="en-US", user_name=None, image_base64=None):
+# --- MODIFIED: Function now accepts chat history to maintain conversation state ---
+def get_health_response(question, language_code="en-US", user_name=None, image_base64=None, chat_history=None):
     if not GENAI_AVAILABLE or not generative_model:
         return "The AI health assistant is currently unavailable. Please check server logs.", []
 
@@ -208,8 +205,8 @@ def get_health_response(question, language_code="en-US", user_name=None, image_b
             pass
             
     try:
-        # --- MODIFIED: Start a new, stateless chat session for each request ---
-        chat = generative_model.start_chat(history=[])
+        # --- MODIFIED: Start chat with the provided history to maintain context ---
+        chat = generative_model.start_chat(history=chat_history if chat_history else [])
         response = chat.send_message(model_input)
         
         raw_text = response.text if hasattr(response, 'text') and response.text else "I couldn't generate a response."
@@ -249,6 +246,8 @@ def ask():
         # --- Get additional data from request ---
         user_name = data.get("userName")
         image_base64 = data.get("imageBase64")
+        # --- NEW: Get conversation history from the request ---
+        raw_history = data.get("history", [])
 
         if image_base64:
             # Strip the header from the base64 string
@@ -257,11 +256,10 @@ def ask():
         if not language or language not in LANGUAGE_MAP:
             language = "en-US"
 
-        # --- MODIFIED: Allow request if there's a question OR an image ---
         if not user_question and not image_base64:
             return jsonify({"error": "No question or image provided"}), 400
 
-        # --- NEW: Handle image-only input by setting a default internal prompt ---
+        # --- Handle image-only input by setting a default internal prompt ---
         if not user_question and image_base64:
             question_for_model = "The user has not provided any text. Please analyze the image provided according to the system instructions for image-only analysis."
         else:
@@ -274,10 +272,26 @@ def ask():
                 print(f"Translated question from '{language}' to 'en': '{question_for_model}'")
             except Exception as e:
                 print(f"Could not translate question, using original. Error: {e}")
-                question_for_model = user_question
+                # question_for_model is already set to user_question
 
-        # --- MODIFIED: Call updated stateless response function ---
-        answer, quick_replies = get_health_response(question_for_model, language, user_name, image_base64)
+        # --- NEW: Format the history for the Generative AI model ---
+        chat_history = []
+        for message in raw_history:
+            role = "user" if message.get("role") == "user" else "model"
+            # Ensure there's text content before adding to history
+            text_part = message.get("text")
+            if text_part:
+                chat_history.append({"role": role, "parts": [text_part]})
+
+
+        # --- MODIFIED: Pass the formatted history to the response function ---
+        answer, quick_replies = get_health_response(
+            question_for_model, 
+            language, 
+            user_name, 
+            image_base64, 
+            chat_history
+        )
 
         audio_base64 = ""
         if source == 'voice':
@@ -290,7 +304,6 @@ def ask():
                     print(f"Error during TTS generation for language {language}: {e}")
                     audio_base64 = ""
 
-        # --- Return quick replies along with answer ---
         return jsonify({"answer": answer, "audio": audio_base64, "quick_replies": quick_replies})
     except Exception as e:
         print(f"A critical error occurred in the /ask route: {e}")
@@ -302,8 +315,9 @@ def transcribe_route():
     # by the Web Speech API flow in the frontend.
     if 'audio_data' not in request.files:
         return jsonify({"error": "No audio file provided"}), 400
-
     # ... (rest of the function if needed) ...
+    return jsonify({"transcription": "Transcription not implemented in this flow."})
 
 if __name__ == "__main__":
     app.run(debug=True)
+
