@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light"> <!-- Default to light mode -->
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,15 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        // Set Tailwind dark mode to use the 'class' strategy
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
+        body { font-family: 'Inter', sans-serif; }
         #chat-box::-webkit-scrollbar, .country-list::-webkit-scrollbar, #chat-history-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -29,31 +24,30 @@
             background-color: rgba(156, 163, 175, 0.5);
             border-radius: 20px;
         }
-        /* Prose adjustments for chat bubbles */
         .prose p { margin-bottom: 0.75rem; }
         .prose ul, .prose ol { margin-left: 1.25rem; margin-bottom: 0.75rem; }
         .prose li { margin-bottom: 0.25rem; }
         .prose h3 { margin-top: 1em; margin-bottom: 0.5em; font-size: 1.1em; }
-
-        /* --- STYLES FOR FEATURES --- */
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .message-animate {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
+        .message-animate { animation: fadeIn 0.3s ease-out forwards; }
+        
         @keyframes pulse-bg {
             0%, 100% { background-color: #e5e7eb; }
             50% { background-color: #d1d5db; }
         }
-        .dark @keyframes pulse-bg {
+        .dark .skeleton-line {
+            animation: pulse-bg-dark 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-bg-dark {
             0%, 100% { background-color: #374151; }
             50% { background-color: #4b5563; }
         }
-        .skeleton-line {
-            animation: pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        .skeleton-line { animation: pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        
         .recording {
             color: #ef4444;
             box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.4);
@@ -64,23 +58,17 @@
             50% { opacity: 0.8; transform: scale(1.05); }
         }
         
-        /* --- NEW UI STYLES FOR SIDEBAR TOGGLE --- */
-        body.sidebar-open #history-sidebar {
-            transform: translateX(0);
-        }
-        body.sidebar-open #sidebar-overlay {
-            display: block;
-        }
-        @media (min-width: 1024px) { /* lg breakpoint */
-            body.sidebar-open #main-content {
-                padding-left: 16rem; /* w-64 */
-            }
+        body.sidebar-open #history-sidebar { transform: translateX(0); }
+        body.sidebar-open #sidebar-overlay { display: block; }
+        
+        @media (min-width: 1024px) {
+            body.sidebar-open #main-content { padding-left: 16rem; }
         }
     </style>
 </head>
 <body id="app-wrapper" class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 overflow-hidden">
 
-<!-- Auth Container - Shown when logged out -->
+<!-- Auth Container -->
 <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen py-10 px-4">
     <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
         <div class="text-center">
@@ -92,21 +80,24 @@
         
         <div class="space-y-3">
             <button id="google-signin-btn" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                <svg class="w-6 h-6" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></svg>
+                <svg class="w-6 h-6" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path></svg>
                 <span>Sign in with Google</span>
             </button>
         </div>
 
-        <div class="my-6 flex items-center"><div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div><span class="mx-4 text-sm font-medium text-gray-400 dark:text-gray-500">OR</span><div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div></div>
+        <div class="my-6 flex items-center">
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+            <span class="mx-4 text-sm font-medium text-gray-400 dark:text-gray-500">OR</span>
+            <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
+        </div>
 
-        <!-- Email/Password Login Section -->
         <div id="email-login-section">
             <form id="email-form" class="space-y-4">
                 <input type="email" id="email-input" placeholder="Email address" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 <input type="password" id="password-input" placeholder="Password (min. 6 characters)" class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 <div class="flex gap-2">
-                    <button type="submit" id="email-signin-btn" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">Sign In</button>
-                    <button type="submit" id="email-signup-btn" class="w-full py-3 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">Sign Up</button>
+                    <button type="button" id="email-signin-btn" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors">Sign In</button>
+                    <button type="button" id="email-signup-btn" class="w-full py-3 px-4 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors">Sign Up</button>
                 </div>
             </form>
         </div>
@@ -115,114 +106,110 @@
     </div>
 </div>
 
-<!-- Main App Container (now a flex container) -->
-<div id="main-app-container" class="relative h-screen w-screen flex">
+<!-- Main App Container -->
+<div id="main-app-container" class="relative h-screen w-screen flex" style="display: none;">
     <!-- Sidebar -->
     <aside id="history-sidebar" class="bg-gray-50 dark:bg-gray-800 w-64 h-full flex flex-col fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out -translate-x-full border-r border-gray-200 dark:border-gray-700">
-        <div class="flex items-center justify-between p-3 h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+        <div class="flex items-center justify-between p-4 h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
             <h2 class="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600">ArogyaMitra</h2>
             <button id="new-chat-btn" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="New Chat">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
         </div>
 
         <div class="flex-grow flex flex-col p-3 overflow-y-hidden">
             <div class="relative mb-4">
-                <input type="text" id="chat-search" placeholder="Search chats..." class="w-full pl-10 pr-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                <input type="text" id="chat-search" placeholder="Search chats..." class="w-full pl-10 pr-4 py-2 bg-gray-200 dark:bg-gray-700 border border-transparent rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
             </div>
             
-            <p class="text-sm font-medium text-gray-500 dark:text-gray-400 px-3 mb-2">Recent</p>
-            <div id="chat-history-list" class="flex-1 overflow-y-auto space-y-1 pr-1">
-                 <!-- Chat history items will be populated here -->
-            </div>
+            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 px-3 mb-2">Recent</p>
+            <div id="chat-history-list" class="flex-1 overflow-y-auto space-y-1 pr-1"></div>
         </div>
 
-        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <button id="clear-chats-btn" class="w-full flex items-center gap-3 text-left p-3 rounded-lg text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.077-2.09.921-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                <span>Clear All Chats</span>
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700 flex-shrink-0 space-y-1">
+            <button id="clear-chats-btn" class="w-full flex items-center gap-3 text-left p-2.5 rounded-lg text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors text-sm">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.077-2.09.921-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                <span>Clear All</span>
             </button>
-            <button id="settings-btn" class="w-full flex items-center gap-3 text-left mt-2 p-3 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-1.226.554-.22 1.19-.22 1.745 0 .56.22 1.02.684 1.11 1.226M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <button id="settings-btn" class="w-full flex items-center gap-3 text-left p-2.5 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm">
+                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.007 1.11-1.226.554-.22 1.19-.22 1.745 0 .56.22 1.02.684 1.11 1.226M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 <span>Settings</span>
             </button>
         </div>
     </aside>
 
-    <!-- Sidebar Overlay for Mobile -->
+    <!-- Sidebar Overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
     
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <main id="main-content" class="flex-1 flex flex-col h-screen transition-all duration-300 ease-in-out">
-        <div id="chat-container" class="flex-1 flex flex-col h-full max-w-3xl mx-auto px-4 w-full">
-            <header class="flex items-center justify-between gap-4 relative py-4 text-center sticky top-0 bg-gray-100/80 dark:bg-gray-900/80 backdrop-blur-sm z-10">
-                <button id="sidebar-toggle-btn" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
+        <div id="chat-container" class="flex-1 flex flex-col h-full max-w-4xl mx-auto px-3 sm:px-4 w-full">
+            
+            <!-- FIXED RESPONSIVE HEADER -->
+            <header class="relative flex items-center justify-between h-16 px-0 sm:px-2 flex-shrink-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-sm z-10 border-b border-gray-200/50 dark:border-gray-700/50">
+                <!-- Left side -->
+                <button id="sidebar-toggle-btn" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
                 </button>
                 
-                <div class="absolute left-1/2 -translate-x-1/2 text-center">
-                    <h1 id="ui-title" class="text-xl font-semibold">ArogyaMitra AI</h1>
-                    <p id="ui-subtitle" class="text-xs text-gray-500 dark:text-gray-400">Trusted Health Guidance</p>
+                <!-- Center (absolutely positioned) -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                    <h1 id="ui-title" class="text-base sm:text-lg font-semibold truncate">ArogyaMitra AI</h1>
+                    <p id="ui-subtitle" class="hidden sm:block text-xs text-gray-500 dark:text-gray-400 truncate">Trusted Health Guidance</p>
                 </div>
 
-                <div class="flex items-center gap-2 ml-auto">
-                    <button id="signout-btn" class="hidden p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
-                    </button>
-                    <button id="theme-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 transition-all">
-                        <svg id="theme-icon-sun" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <svg id="theme-icon-moon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                    </button>
+                <!-- Right side -->
+                <div class="flex items-center gap-1 sm:gap-2">
+                    <!-- Language Selector -->
                     <div class="relative">
-                        <select id="language-selector" class="hidden">
-                             <option value="en-US">English</option>
-                             <option value="es-ES">Español</option>
-                             <option value="hi-IN">हिन्दी</option>
-                             <option value="fr-FR">Français</option>
-                             <option value="de-DE">Deutsch</option>
-                             <option value="te-IN">తెలుగు</option>
-                             <option value="ta-IN">தமிழ்</option>
-                             <option value="or-IN">ଓଡିଆ</option>
-                             <option value="bn-IN">বাংলা</option>
-                             <option value="mr-IN">मराठी</option>
-                             <option value="gu-IN">ગુજરાતી</option>
-                             <option value="kn-IN">ಕನ್ನಡ</option>
-                        </select>
-                        <button id="language-selector-button" class="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 p-2.5 transition-colors">
+                        <button id="language-selector-button" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                            <span id="selected-language-label" class="font-medium">English</span>
-                            <svg class="w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                         </button>
-                        <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-10"></div>
+                        <div id="language-dropdown" class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 hidden overflow-hidden z-50 max-h-80 overflow-y-auto"></div>
                     </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="theme-toggle" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <svg id="theme-icon-sun" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <svg id="theme-icon-moon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+
+                    <!-- Sign Out -->
+                    <button id="signout-btn" class="hidden p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+                    </button>
                 </div>
             </header>
 
-            <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6"></main>
 
+            <!-- Chat Messages -->
+            <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6 py-4"></main>
+
+            <!-- Quick Replies -->
             <div id="quick-reply-box" class="py-2 flex items-center justify-center flex-wrap gap-2"></div>
 
-            <footer class="py-4">
+            <!-- Input Area -->
+            <footer class="py-3 sm:py-4">
                 <div id="image-preview-container" class="relative hidden w-24 h-24 mb-2 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
                     <img id="image-preview" class="w-full h-full object-contain rounded" />
                     <button id="remove-image-btn" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 w-6 h-6 flex items-center justify-center text-xs">&times;</button>
                 </div>
                 <div class="relative bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm flex items-center">
-                    <button id="upload-btn" class="p-4 text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors focus:outline-none">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
+                    <button id="upload-btn" class="p-3 sm:p-4 text-gray-500 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
                     </button>
                     <input type="file" id="image-upload" class="hidden" accept="image/*">
-                    <input type="text" id="user-input" placeholder="Loading..." class="w-full bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 py-4 pr-28 rounded-xl focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 transition-shadow" disabled>
-                    <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                        <button id="stop-btn" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors hidden">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0z" fill="none"/><path d="M6 6h12v12H6z"/></svg>
+                    <input type="text" id="user-input" placeholder="Ask a health question..." class="w-full bg-transparent text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 py-3 sm:py-4 pr-24 sm:pr-28 text-sm sm:text-base rounded-xl focus:outline-none" disabled>
+                    <div class="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        <button id="stop-btn" class="p-1.5 sm:p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors hidden">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
                         </button>
-                        <button id="mic-btn" class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                        <button id="mic-btn" class="p-1.5 sm:p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
                         </button>
-                        <button id="send-btn" class="p-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+                        <button id="send-btn" class="p-1.5 sm:p-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
                         </button>
                     </div>
                 </div>
@@ -231,81 +218,54 @@
     </main>
 </div>
 
-
 <!-- Settings Modal -->
-<div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md m-4">
+<div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md">
         <h2 class="text-xl font-bold mb-4">Personalize Your Experience</h2>
-        <p class="text-gray-600 dark:text-gray-400 mb-4">Providing your name helps the AI address you personally.</p>
+        <p class="text-gray-600 dark:text-gray-400 mb-4 text-sm">Providing your name helps the AI address you personally.</p>
         <div>
-            <label for="name-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Your Name</label>
-            <input type="text" id="name-input" class="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <label for="name-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Your Name</label>
+            <input type="text" id="name-input" class="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
         </div>
         <div class="mt-6 flex justify-end gap-3">
-            <button id="close-modal-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition">Cancel</button>
-            <button id="save-settings-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Save</button>
+            <button id="close-modal-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition text-sm">Cancel</button>
+            <button id="save-settings-btn" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition text-sm">Save</button>
         </div>
     </div>
 </div>
 
 <script type="module">
-    // --- Import ALL necessary Firebase functions ---
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { 
-        getAuth, onAuthStateChanged, GoogleAuthProvider,
-        signInWithPopup,
-        createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import {
-        getFirestore, collection, doc, setDoc, getDoc, addDoc, getDocs, 
-        deleteDoc, query, where, orderBy, writeBatch
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyAf3z3up2k-4iwwTxNlzetKSyy3VBgzb0g",
-        authDomain: "arogyamitra-ai-ef0f9.firebaseapp.com",
-        projectId: "arogyamitra-ai-ef0f9",
-        storageBucket: "arogyamitra-ai-ef0f9.appspot.com",
-        messagingSenderId: "261433543729",
-        appId: "1:261433543729:web:8e5eada54a07cbf3185910",
-        measurementId: "G-HC9C6HVTP9"
-    };
+    // --- STATE VARIABLES (DEMO MODE) ---
+    let isAuthenticated = false;
+    let currentChatId = null;
+    let messages = [];
+    let chatHistory = [];
+    let userName = localStorage.getItem('arogyaMitraUserName') || null;
+    let imageBase64 = null;
+    let currentAudio = null;
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app); // Initialize Firestore
-    const googleProvider = new GoogleAuthProvider();
-
-    // --- Element Selectors ---
-    // Auth Elements
+    // --- ELEMENT SELECTORS ---
     const authContainer = document.getElementById('auth-container');
+    const mainAppContainer = document.getElementById('main-app-container');
     const googleSignInBtn = document.getElementById('google-signin-btn');
-    const emailForm = document.getElementById('email-form');
-    const emailInput = document.getElementById('email-input');
-    const passwordInput = document.getElementById('password-input');
     const emailSignInBtn = document.getElementById('email-signin-btn');
     const emailSignUpBtn = document.getElementById('email-signup-btn');
     const signOutBtn = document.getElementById('signout-btn');
     const authError = document.getElementById('auth-error');
-
-    // App & Chat Elements
-    const mainAppContainer = document.getElementById('main-app-container');
-    const chatContainer = document.getElementById('chat-container');
-    const chatBox = document.getElementById("chat-box");
-    const userInput = document.getElementById("user-input");
-    const sendBtn = document.getElementById("send-btn");
-    const micBtn = document.getElementById("mic-btn");
-    const stopBtn = document.getElementById("stop-btn");
-    const quickReplyBox = document.getElementById('quick-reply-box');
-    const languageSelector = document.getElementById("language-selector");
-    const languageSelectorButton = document.getElementById('language-selector-button');
-    const selectedLanguageLabel = document.getElementById('selected-language-label');
-    const languageDropdown = document.getElementById('language-dropdown');
+    const appWrapper = document.getElementById('app-wrapper');
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    const newChatBtn = document.getElementById('new-chat-btn');
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const micBtn = document.getElementById('mic-btn');
+    const stopBtn = document.getElementById('stop-btn');
     const themeToggle = document.getElementById('theme-toggle');
     const themeIconSun = document.getElementById('theme-icon-sun');
     const themeIconMoon = document.getElementById('theme-icon-moon');
+    const languageSelectorButton = document.getElementById('language-selector-button');
+    const languageDropdown = document.getElementById('language-dropdown');
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
     const closeModalBtn = document.getElementById('close-modal-btn');
@@ -316,325 +276,94 @@
     const imagePreviewContainer = document.getElementById('image-preview-container');
     const imagePreview = document.getElementById('image-preview');
     const removeImageBtn = document.getElementById('remove-image-btn');
-    
-    // History Sidebar Elements
-    const appWrapper = document.getElementById('app-wrapper');
-    const historySidebar = document.getElementById('history-sidebar');
-    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
-    const mainContent = document.getElementById('main-content');
-    const newChatBtn = document.getElementById('new-chat-btn');
-    const chatSearchInput = document.getElementById('chat-search');
     const chatHistoryList = document.getElementById('chat-history-list');
+    const chatSearchInput = document.getElementById('chat-search');
     const clearChatsBtn = document.getElementById('clear-chats-btn');
-
-    // --- State Variables ---
-    let currentUserId = null;
-    let currentAudio = null;
-    let userName = null;
-    let imageBase64 = null;
-    let chatHistory = [];
-    let currentChatId = null;
-    let messages = [];
-
-    const uiStrings = {
-        'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance, Anytime, Anywhere", welcome: "<p>Hello! I'm your AI Health Advisor. Ask me about symptoms, upload an image of a meal or a skin concern, or use the profile icon to tell me your name for a more personal chat.</p>", placeholder: "Ask a health question or describe an image...", listening: "Listening... speak now." },
-        'es-ES': { title: "Asesor de Salud IA", subtitle: "Tu amigable recurso de salud impulsado por IA", welcome: "<p>Bienvenido. Soy tu Asesor de Salud de IA. Pregúntame cualquier cosa sobre síntomas, condiciones, fitness o nutrición.</p>", placeholder: "Pregunta sobre un tema de salud...", listening: "Escuchando... hable ahora." },
-        'hi-IN': { title: "आरोग्यमित्र AI", subtitle: " आपका मित्र AI-संचालित स्वास्थ्य संसाधन", welcome: "<p>नमस्ते। मैं आपका AI स्वास्थ्य सलाहकार हूँ। मुझसे लक्षण, रोग, फिटनेस, या पोषण के बारे में कुछ भी पूछें।</p>", placeholder: "स्वास्थ्य विषय के बारे में पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
-        'fr-FR': { title: "Conseiller Santé IA", subtitle: "Votre ressource santé conviviale alimentée par l'IA", welcome: "<p>Bienvenue. Je suis votre conseiller en santé IA. Posez-moi des questions sur les symptômes, les conditions, la forme physique ou la nutrition.</p>", placeholder: "Posez une question sur un sujet de santé...", listening: "J'écoute... parlez maintenant." },
-        'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
-        'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
-        'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనିచేசే சுகாதార వளம்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
-        'or-IN': { title: "ଆରୋଗ୍ଯମିତ్ర AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାగତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" },
-        'bn-IN': { title: "আরोग্যমিত্র AI", subtitle: "আপনার বন্ধুত্বপূর্ণ AI-চালিত স্বাস্থ্য সম্পদ", welcome: "<p>স্বাগত। আমি আপনার AI স্বাস্থ্য উপদেষ্টা। লক্ষণ, অবস্থা, ফিটনেস বা পুষ্টি সম্পর্কে আমাকে কিছু জিজ্ঞাসা করুন।</p>", placeholder: "একটি স্বাস্থ্য বিষয় সম্পর্কে জিজ্ঞাসা করুন...", listening: "শুনছি... এখন বলুন।" },
-        'mr-IN': { title: "आरोग्यमित्र AI", subtitle: "तुमचे मैत्रीपूर्ण AI-चालित आरोग्य संसाधन", welcome: "<p>स्वागत आहे. मी तुमचा AI आरोग्य सल्लागार आहे. मला लक्षणे, परिस्थिती, फिटनेस किंवा पोषणाबद्दल काहीही विचारा.</p>", placeholder: "आरोग्य विषयाबद्दल विचारा...", listening: "ऐकत आहे... आता बोला." },
-        'gu-IN': { title: "આરોગ્યમિત્ર AI", subtitle: "તમારું મૈત્રીપૂર્ણ AI-સંચાલित આરોગ્ય સંસાધન", welcome: "<p>સ્વાગત છે. હું તમારો AI આરોગ્ય સલાહકાર છું. મને લક્ષણો, પરિસ્થિતિઓ, ફિટનેસ અથવા પોષણ વિશે કંઈપણ પૂછો.</p>", placeholder: "આરોગ્ય વિષય વિશે પૂછો...", listening: "સાંભળી રહ્યો છું... હવે બોલો." },
-        'kn-IN': { title: "ಆರೋಗ್ಯಮಿತ್ರ AI", subtitle: "ನಿಮ್ಮ ಸ್ನೇಹಪರ AI-ಚಾಲಿತ ಆರೋಗ್ಯ ಸಂಪನ್ಮೂಲ", welcome: "<p>ಸ್ವಾಗತ. ನಾನು ನಿಮ್ಮ AI ಆರೋಗ್ಯ ಸಲಹೆಗಾರ. ರೋಗಲಕ್ಷಣಗಳು, ಪರಿಸ್ಥಿತಿಗಳು, ಫಿಟ್ನೆಸ್ ಅಥವಾ ಪೋಷಣೆಯ ಬಗ್ಗೆ ನನ್ನನ್ನು ಏನು ಬೇಕಾದರೂ ಕೇಳಿ.</p>", placeholder: "ಆರೋಗ್ಯ ವಿಷಯದ ಬಗ್ಗೆ ಕೇಳಿ...", listening: "ಕೇಳುತ್ತಿದೆ... ಈಗ ಮಾತನಾಡಿ." }
-    };
-
-    // ========================================================================
-    // Authentication Logic
-    // ========================================================================
-
-    const showAuthError = (message) => {
-        authError.textContent = message;
-        authError.classList.remove('hidden');
-    }
+    const quickReplyBox = document.getElementById('quick-reply-box');
+    const uiTitle = document.getElementById('ui-title');
+    const uiSubtitle = document.getElementById('ui-subtitle');
     
-    onAuthStateChanged(auth, async (user) => {
-        if (user) {
-            currentUserId = user.uid;
+    // --- UI STRINGS FOR LOCALIZATION ---
+    const uiStrings = {
+      'en-US': { title: "ArogyaMitra AI", subtitle: "Trusted Health Guidance", welcome: "<p>Hello! I am your AI Health Advisor. How can I help you today?</p>", placeholder: "Ask a health question...", listening: "Listening... speak now." },
+      'es-ES': { title: "Asesor de Salud IA", subtitle: "Guía de Salud Confiable", welcome: "<p>¡Hola! Soy tu Asesor de Salud de IA. ¿Cómo puedo ayudarte hoy?</p>", placeholder: "Haz una pregunta de salud...", listening: "Escuchando... hable ahora." },
+      'hi-IN': { title: "आरोग्यमित्र AI", subtitle: "विश्वसनीय स्वास्थ्य मार्गदर्शन", welcome: "<p>नमस्ते! मैं आपका AI स्वास्थ्य सलाहकार हूँ। मैं आज आपकी कैसे मदद कर सकता हूँ?</p>", placeholder: "स्वास्थ्य संबंधी प्रश्न पूछें...", listening: "सुन रहा हूँ... अब बोलें।" },
+    };
+    const languages = [ {code: 'en-US', name: 'English'}, {code: 'es-ES', name: 'Español'}, {code: 'hi-IN', name: 'हिन्दी'} ];
+
+    // --- CORE LOGIC ---
+
+    const setAuthState = (loggedIn) => {
+        isAuthenticated = loggedIn;
+        if (loggedIn) {
             authContainer.style.display = 'none';
             mainAppContainer.style.display = 'flex';
             signOutBtn.classList.remove('hidden');
             userInput.disabled = false;
-            sendBtn.disabled = userInput.value.trim() === '' && !imageBase64;
-            
-            await loadChatHistory();
+            setLanguage(localStorage.getItem('arogyaMitraLanguage') || 'en-US');
+            loadChatHistory();
             startNewChat();
-            loadUserProfile();
-            setLanguage(localStorage.getItem('arogyaMitraLanguage') || 'en-US', false);
         } else {
-            currentUserId = null;
             authContainer.style.display = 'flex';
             mainAppContainer.style.display = 'none';
             signOutBtn.classList.add('hidden');
             userInput.disabled = true;
             userInput.placeholder = "Please sign in to chat.";
-            
-            chatHistory = [];
-            messages = [];
-            currentChatId = null;
-            renderChatHistoryList();
         }
-    });
+    };
 
-    googleSignInBtn.addEventListener('click', () => {
-        signInWithPopup(auth, googleProvider).catch((error) => showAuthError(error.message));
-    });
+    const handleSend = () => {
+        const question = userInput.value.trim();
+        if (!question && !imageBase64) return;
 
-    emailSignInBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch((error) => showAuthError(error.message));
-    });
+        addMessage(question || "Image attached", 'user', imageBase64);
+        messages.push({ content: question, type: 'user', image: imageBase64 });
+        
+        userInput.value = '';
+        removeImage();
+        sendBtn.disabled = true;
+        showTypingIndicator();
 
-    emailSignUpBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value).catch((error) => showAuthError(error.message));
-    });
+        // Simulate AI response
+        setTimeout(() => {
+            hideTypingIndicator();
+            const botResponse = `This is a demo response to your message: "${question}". In a real application, an AI would provide a detailed answer here.`;
+            addMessage(botResponse, 'bot');
+            messages.push({ content: botResponse, type: 'bot', image: null });
+            saveChat();
+        }, 1500);
+    };
 
-    signOutBtn.addEventListener('click', () => {
-        signOut(auth).catch((error) => console.error("Sign Out Error:", error));
-    });
-    
-    // ========================================================================
-    // Chat History & Firestore Logic
-    // ========================================================================
+    const addMessage = (content, type, imageData = null) => {
+        const messageWrapper = document.createElement("div");
+        messageWrapper.className = `flex items-start gap-3 message-animate ${type === 'user' ? 'justify-end' : ''}`;
+        
+        let imageHTML = '';
+        if (imageData) {
+            imageHTML = `<img src="${imageData}" class="mt-2 rounded-lg max-w-xs max-h-48 object-contain">`;
+        }
+        
+        const userAvatar = `<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center text-gray-500 dark:text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
+        const botAvatar = `<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg></div>`;
 
-    const saveChat = async () => {
-        if (!currentUserId || messages.length <= 1) return;
-
-        const existingChatIndex = chatHistory.findIndex(chat => chat.id === currentChatId);
-        let chatTitle;
-
-        if (existingChatIndex > -1 && chatHistory[existingChatIndex].title && chatHistory[existingChatIndex].title !== 'New Chat') {
-            chatTitle = chatHistory[existingChatIndex].title;
+        if (type === 'user') {
+            messageWrapper.innerHTML = `
+                <div class="prose max-w-none bg-indigo-500 text-white rounded-lg p-3 sm:p-4 rounded-br-none shadow-sm flex flex-col items-start">
+                    <p>${content}</p>${imageHTML}
+                </div>
+                ${userAvatar}
+            `;
         } else {
-            const userMessages = messages.filter(m => m.type === 'user' && m.content);
-            let titleSource = '';
-            if (userMessages.length > 0) {
-                titleSource = userMessages.reduce((a, b) => a.content.length > b.content.length ? a : b).content;
-            } else if (messages.length > 1) {
-                const firstMeaningfulBotResponse = messages.find((m, index) => m.type === 'bot' && index > 0);
-                if (firstMeaningfulBotResponse) titleSource = firstMeaningfulBotResponse.content;
-            }
-            chatTitle = titleSource ? titleSource.substring(0, 40) + (titleSource.length > 40 ? '...' : '') : 'New Chat';
-        }
-
-        const chatData = {
-            id: currentChatId,
-            title: chatTitle,
-            messages: messages,
-            timestamp: Date.now()
-        };
-
-        try {
-            const chatDocRef = doc(db, 'users', currentUserId, 'chats', currentChatId);
-            await setDoc(chatDocRef, chatData);
-            
-            if (existingChatIndex > -1) {
-                chatHistory[existingChatIndex] = chatData;
-            } else {
-                chatHistory.unshift(chatData);
-            }
-            chatHistory.sort((a, b) => b.timestamp - a.timestamp);
-            renderChatHistoryList();
-
-        } catch (error) {
-            console.error("Error saving chat:", error);
-        }
-    };
-    
-    const loadChatHistory = async () => {
-        if (!currentUserId) return;
-        try {
-            const chatsRef = collection(db, 'users', currentUserId, 'chats');
-            const q = query(chatsRef, orderBy('timestamp', 'desc'));
-            const querySnapshot = await getDocs(q);
-            chatHistory = querySnapshot.docs.map(doc => doc.data());
-            renderChatHistoryList();
-        } catch (error) {
-            console.error("Error loading chat history:", error);
-            chatHistory = [];
-            renderChatHistoryList();
-        }
-    };
-
-    const renderChatHistoryList = (filter = '') => {
-        chatHistoryList.innerHTML = '';
-        const filteredHistory = chatHistory.filter(chat => chat.title.toLowerCase().includes(filter.toLowerCase()));
-
-        if (filteredHistory.length === 0) {
-            chatHistoryList.innerHTML = `<p class="text-sm text-gray-500 dark:text-gray-400 p-3">No recent chats.</p>`;
-            return;
-        }
-
-        filteredHistory.forEach(chat => {
-            const item = document.createElement('div');
-            item.className = `group flex items-center justify-between p-3 rounded-lg cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${chat.id === currentChatId ? 'bg-indigo-100 dark:bg-indigo-900/50' : ''}`;
-            item.dataset.chatId = chat.id;
-
-            item.innerHTML = `
-                <p class="truncate text-sm flex-1">${chat.title}</p>
-                <div class="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
-                    <button class="rename-chat-btn p-1 text-gray-500 hover:text-indigo-500" title="Rename"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg></button>
-                    <button class="delete-chat-btn p-1 text-gray-500 hover:text-red-500" title="Delete"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.077-2.09.921-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+            messageWrapper.innerHTML = `
+                ${botAvatar}
+                <div class="prose max-w-none bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 rounded-tl-none shadow-sm border border-gray-200 dark:border-gray-700">
+                   <div class="text-gray-800 dark:text-gray-200">${marked.parse(content)}</div>
                 </div>
             `;
-            
-            item.addEventListener('click', (e) => {
-                if (!e.target.closest('button')) {
-                    loadChat(chat.id);
-                }
-            });
-
-            item.querySelector('.rename-chat-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                renameChat(chat.id, chat.title);
-            });
-            item.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                deleteChat(chat.id);
-            });
-
-            chatHistoryList.appendChild(item);
-        });
-    };
-    
-    const loadChat = (chatId) => {
-        saveChat();
-        
-        const chat = chatHistory.find(c => c.id === chatId);
-        if (!chat) return;
-        
-        stopAudio();
-        clearQuickReplies();
-        chatBox.innerHTML = '';
-        messages = [...chat.messages];
-        currentChatId = chatId;
-
-        messages.forEach(msg => {
-            const content = (msg.type === 'bot' && msg.isMarkdown) ? marked.parse(msg.content) : msg.content;
-            addMessage(content, msg.type, msg.audio, msg.image);
-        });
-
-        renderChatHistoryList(); // Highlight the active chat
-        closeSidebarOnMobile();
-    };
-
-    const startNewChat = () => {
-        saveChat();
-
-        currentChatId = `chat-${Date.now()}`;
-        messages = [];
-        chatBox.innerHTML = '';
-        clearQuickReplies();
-        userInput.value = '';
-        sendBtn.disabled = true;
-        removeImage();
-        const lang = languageSelector.value || 'en-US';
-        addMessageToState(uiStrings[lang].welcome, 'bot', null, null, true); 
-        renderChatHistoryList();
-    };
-
-    const renameChat = async (chatId, oldTitle) => {
-        const newTitle = prompt("Enter a new name for this chat:", oldTitle.replace('...', ''));
-        if (newTitle && newTitle.trim() !== "") {
-            try {
-                const trimmedTitle = newTitle.trim();
-                const chatDocRef = doc(db, 'users', currentUserId, 'chats', chatId);
-                await setDoc(chatDocRef, { title: trimmedTitle }, { merge: true });
-
-                const chatIndex = chatHistory.findIndex(c => c.id === chatId);
-                if (chatIndex > -1) {
-                    chatHistory[chatIndex].title = trimmedTitle;
-                    renderChatHistoryList();
-                }
-            } catch (error) {
-                console.error("Error renaming chat:", error);
-            }
         }
-    };
-    
-    const deleteChat = async (chatId) => {
-        if (confirm("Are you sure you want to delete this chat?")) {
-            try {
-                await deleteDoc(doc(db, 'users', currentUserId, 'chats', chatId));
-                chatHistory = chatHistory.filter(c => c.id !== chatId);
-                if (currentChatId === chatId) {
-                    startNewChat();
-                }
-                renderChatHistoryList();
-            } catch (error) {
-                console.error("Error deleting chat:", error);
-            }
-        }
-    };
-
-    const clearAllChats = async () => {
-        if(confirm("Are you sure you want to delete ALL chats? This cannot be undone.")) {
-            try {
-                const chatsRef = collection(db, 'users', currentUserId, 'chats');
-                const querySnapshot = await getDocs(chatsRef);
-                const batch = writeBatch(db);
-                querySnapshot.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                await batch.commit();
-
-                chatHistory = [];
-                startNewChat();
-            } catch (error) {
-                console.error("Error clearing all chats: ", error);
-            }
-        }
-    }
-
-
-    // ========================================================================
-    // Chat & Feature Logic
-    // ========================================================================
-
-    const addMessage = (content, type, audioData = null, imageData = null) => {
-        const messageId = `msg-${Date.now()}`;
-        const messageWrapper = document.createElement("div");
-        messageWrapper.className = `${type}-message flex items-start gap-3 message-animate`;
-        if (type === 'user') {
-             messageWrapper.classList.add('justify-end');
-        }
-        
-        const controls = `
-            <div class="flex items-center gap-2 mt-2">
-                <button class="copy-btn p-1 text-gray-400 hover:text-indigo-500 transition-colors" title="Copy text" data-clipboard-target="#${messageId}-content"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg></button>
-                ${audioData ? `<button class="speaker-btn p-1 text-gray-400 hover:text-indigo-500 transition-colors" title="Play audio" onclick="playAudio('${audioData}')"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /></svg></button>` : ''}
-            </div>`;
-
-        let messageHTML = '';
-        if (type === 'user') {
-            const imageHTML = imageData ? `<img src="${imageData}" class="mt-2 rounded-lg max-w-xs max-h-48 object-contain self-end">` : '';
-            messageHTML = `<div class="prose max-w-none bg-indigo-500 text-white rounded-lg p-4 rounded-br-none shadow-sm flex flex-col items-start"><p>${content}</p>${imageHTML}</div><div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center text-gray-500 dark:text-gray-400"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>`;
-        } else {
-            messageHTML = `<div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg></div><div class="flex flex-col"><div class="prose max-w-none bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none shadow-sm border border-gray-200 dark:border-gray-700"><div id="${messageId}-content" class="text-gray-800 dark:text-gray-200">${content}</div></div>${controls}</div>`;
-        }
-        messageWrapper.innerHTML = messageHTML;
         chatBox.appendChild(messageWrapper);
         chatBox.scrollTop = chatBox.scrollHeight;
     };
-
-    const addMessageToState = (content, type, audioData = null, imageData = null, isMarkdown = false) => {
-        messages.push({ content, type, audio: audioData, image: imageData, timestamp: Date.now(), isMarkdown });
-        addMessage(isMarkdown ? marked.parse(content) : content, type, audioData, imageData);
-    }
 
     const showTypingIndicator = () => {
         const typingIndicatorHTML = `<div id="typing-indicator" class="bot-message flex items-start gap-3 message-animate"><div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex-shrink-0 flex items-center justify-center text-white"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"/><path d="m12 14-4-4"/><path d="M12 21a9 9 0 0 0 0-18 9 9 0 0 0 0 18Z"/></svg></div><div class="bg-white dark:bg-gray-800 rounded-lg p-4 rounded-tl-none flex flex-col space-y-2 shadow-sm border border-gray-200 dark:border-gray-700 w-48"><div class="skeleton-line h-3 w-5/6 rounded"></div><div class="skeleton-line h-3 w-full rounded"></div><div class="skeleton-line h-3 w-4/6 rounded"></div></div></div>`;
@@ -646,90 +375,107 @@
         const indicator = document.getElementById("typing-indicator");
         if (indicator) indicator.remove();
     };
+    
+    // --- UI & THEME ---
+    
+    const applyTheme = (theme) => {
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        themeIconSun.classList.toggle('hidden', theme === 'dark');
+        themeIconMoon.classList.toggle('hidden', theme !== 'dark');
+        localStorage.setItem('theme', theme);
+    };
 
-    const handleSend = async (source = 'text', questionOverride = null) => {
-        const question = questionOverride || userInput.value.trim();
-        if ((!question && !imageBase64) || !currentUserId) return;
-
-        stopAudio();
-        clearQuickReplies();
-        const userMessageText = question || "Image uploaded. Please analyze.";
-        addMessageToState(userMessageText, 'user', null, imageBase64);
+    const setLanguage = (langCode) => {
+        const strings = uiStrings[langCode] || uiStrings['en-US'];
+        uiTitle.innerText = strings.title;
+        uiSubtitle.innerText = strings.subtitle;
+        userInput.placeholder = strings.placeholder;
+        localStorage.setItem('arogyaMitraLanguage', langCode);
         
-        const sentImageBase64 = imageBase64;
-        userInput.value = "";
-        sendBtn.disabled = true;
-        removeImage();
-        showTypingIndicator();
-
-        try {
-            const response = await fetch("/ask", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    userId: currentUserId, 
-                    question: question, 
-                    language: languageSelector.value, 
-                    source: source, 
-                    userName: userName, 
-                    imageBase64: sentImageBase64,
-                    chatHistory: messages
-                }),
-            });
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({ error: `HTTP error! status: ${response.status}`}));
-                throw new Error(errData.error || 'Failed to fetch');
+        // Update welcome message only if it's a new chat
+        if (messages.length <= 1) {
+            chatBox.innerHTML = '';
+            addMessage(strings.welcome, 'bot');
+            if (messages.length > 0) {
+                 messages[0].content = strings.welcome;
             }
-            const data = await response.json();
-            hideTypingIndicator();
-            addMessageToState(data.answer, 'bot', data.audio, null, true);
-            
-            if (data.audio) playAudio(data.audio);
-            if (data.quick_replies?.length > 0) renderQuickReplies(data.quick_replies);
-            
-            await saveChat();
-
-        } catch (error) {
-            console.error("Error fetching response:", error);
-            hideTypingIndicator();
-            addMessageToState(`Sorry, something went wrong. <br><small class="text-red-500">${error.message}</small>`, 'bot', null, null, true);
-        } finally {
-            sendBtn.disabled = userInput.value.trim() === '' && !imageBase64;
-            userInput.focus();
         }
     };
     
-    const renderQuickReplies = (replies) => {
-        quickReplyBox.innerHTML = '';
-        replies.forEach(reply => {
-            const button = document.createElement('button');
-            button.textContent = reply;
-            button.className = "px-4 py-2 bg-indigo-100 dark:bg-gray-700 text-indigo-700 dark:text-gray-200 rounded-full text-sm hover:bg-indigo-200 dark:hover:bg-gray-600 transition-colors";
-            button.onclick = () => handleSend('text', reply);
-            quickReplyBox.appendChild(button);
-        });
+    // --- SIDEBAR & CHAT HISTORY ---
+    
+    const startNewChat = () => {
+        if (currentChatId && messages.length > 1) {
+            saveChat();
+        }
+        currentChatId = `chat-${Date.now()}`;
+        messages = [];
+        chatBox.innerHTML = '';
+        const lang = localStorage.getItem('arogyaMitraLanguage') || 'en-US';
+        addMessage(uiStrings[lang].welcome, 'bot');
+        messages.push({ content: uiStrings[lang].welcome, type: 'bot', image: null });
+        renderChatHistoryList();
     };
 
-    const clearQuickReplies = () => { quickReplyBox.innerHTML = ''; };
-    const loadUserProfile = () => {
-        userName = localStorage.getItem('arogyaMitraUserName');
-        if (userName) nameInput.value = userName;
+    const saveChat = () => {
+        if (!currentChatId || messages.length <= 1) return;
+        const userMessage = messages.find(m => m.type === 'user');
+        const title = userMessage ? userMessage.content.substring(0, 30) + '...' : 'New Chat';
+        const chatData = { id: currentChatId, title, messages: [...messages], timestamp: Date.now() };
+        
+        const existingIndex = chatHistory.findIndex(c => c.id === currentChatId);
+        if (existingIndex > -1) {
+            chatHistory[existingIndex] = chatData;
+        } else {
+            chatHistory.unshift(chatData);
+        }
+        localStorage.setItem('arogyaMitraChatHistory', JSON.stringify(chatHistory));
+        renderChatHistoryList();
     };
-    const stopAudio = () => {
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio.currentTime = 0;
-            currentAudio = null;
-            stopBtn.classList.add('hidden');
+
+    const loadChatHistory = () => {
+        chatHistory = JSON.parse(localStorage.getItem('arogyaMitraChatHistory')) || [];
+        chatHistory.sort((a,b) => b.timestamp - a.timestamp);
+        renderChatHistoryList();
+    };
+    
+    const loadChat = (chatId) => {
+        saveChat(); // Save current chat before switching
+        const chat = chatHistory.find(c => c.id === chatId);
+        if (chat) {
+            currentChatId = chat.id;
+            messages = [...chat.messages];
+            chatBox.innerHTML = '';
+            messages.forEach(msg => addMessage(msg.content, msg.type, msg.image));
+            renderChatHistoryList();
         }
     };
-    window.playAudio = (base64String) => {
-        stopAudio();
-        currentAudio = new Audio(`data:audio/mp3;base64,${base64String}`);
-        currentAudio.play();
-        stopBtn.classList.remove('hidden');
-        currentAudio.onended = stopAudio;
+
+    const renderChatHistoryList = (filter = '') => {
+        chatHistoryList.innerHTML = '';
+        const filtered = chatHistory.filter(c => c.title.toLowerCase().includes(filter.toLowerCase()));
+        if (filtered.length === 0) {
+            chatHistoryList.innerHTML = `<p class="text-sm text-gray-500 dark:text-gray-400 p-3">No chats found.</p>`;
+            return;
+        }
+        filtered.forEach(chat => {
+            const item = document.createElement('button');
+            item.className = `w-full text-left p-3 rounded-lg truncate text-sm transition-colors ${chat.id === currentChatId ? 'bg-indigo-100 dark:bg-indigo-900/50 font-medium' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}`;
+            item.textContent = chat.title;
+            item.onclick = () => loadChat(chat.id);
+            chatHistoryList.appendChild(item);
+        });
     };
+    
+    const clearAllChats = () => {
+        if(confirm("Are you sure you want to delete all chats?")) {
+            chatHistory = [];
+            localStorage.removeItem('arogyaMitraChatHistory');
+            startNewChat();
+        }
+    };
+    
+    // --- IMAGE HANDLING ---
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -742,6 +488,7 @@
         };
         reader.readAsDataURL(file);
     };
+
     const removeImage = () => {
         imageBase64 = null;
         imagePreview.src = '';
@@ -749,68 +496,82 @@
         imageUploadInput.value = '';
         sendBtn.disabled = userInput.value.trim() === '';
     };
-    const setLanguage = (lang, shouldStartNewChat = true) => {
-        const strings = uiStrings[lang] || uiStrings['en-US'];
-        const selectedOption = Array.from(languageSelector.options).find(opt => opt.value === lang);
-        document.getElementById('ui-title').innerText = strings.title;
-        document.getElementById('ui-subtitle').innerText = strings.subtitle.split(',')[0]; // Shorten subtitle
-        userInput.placeholder = strings.placeholder;
-        selectedLanguageLabel.innerText = selectedOption ? selectedOption.text : 'English';
-        languageSelector.value = lang;
-        localStorage.setItem('arogyaMitraLanguage', lang);
-        if(shouldStartNewChat) {
-            startNewChat();
-        } else if (messages.length === 0) {
-            addMessageToState(strings.welcome, 'bot', null, null, true);
-        }
-    };
-    const applyTheme = (theme) => {
-        document.documentElement.classList.toggle('dark', theme === 'dark');
-        themeIconSun.classList.toggle('hidden', theme === 'dark');
-        themeIconMoon.classList.toggle('hidden', theme !== 'dark');
-    };
-    
-    // --- NEW Sidebar Toggle Logic ---
-    const closeSidebarOnMobile = () => {
-        if (window.innerWidth < 1024) {
-            appWrapper.classList.remove('sidebar-open');
-        }
-    };
 
-    sidebarToggleBtn.addEventListener('click', () => {
-        appWrapper.classList.toggle('sidebar-open');
-    });
+    // --- INITIALIZATION & EVENT LISTENERS ---
 
-    sidebarOverlay.addEventListener('click', () => {
-        appWrapper.classList.remove('sidebar-open');
-    });
-
-    // ========================================================================
-    // Initialization & Event Listeners
-    // ========================================================================
-    
     document.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(savedTheme);
-        
+
         if (window.innerWidth >= 1024) {
             appWrapper.classList.add('sidebar-open');
         }
-        
-        window.addEventListener('beforeunload', saveChat);
 
-        populateLanguageDropdown();
+        // Populate language dropdown
+        languages.forEach(lang => {
+            const item = document.createElement('a');
+            item.href = '#';
+            item.textContent = lang.name;
+            item.dataset.value = lang.code;
+            item.className = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 transition-colors';
+            item.onclick = (e) => { 
+                e.preventDefault(); 
+                setLanguage(lang.code); 
+                languageDropdown.classList.add('hidden');
+            };
+            languageDropdown.appendChild(item);
+        });
+
+        if (userName) nameInput.value = userName;
     });
 
-    sendBtn.addEventListener("click", () => handleSend('text'));
+    // Auth buttons
+    const demoSignIn = () => {
+        const email = document.getElementById('email-input').value;
+        if (email) {
+            setAuthState(true);
+        } else {
+            authError.textContent = 'Please enter a dummy email to sign in.';
+            authError.classList.remove('hidden');
+        }
+    };
+    googleSignInBtn.addEventListener('click', () => setAuthState(true));
+    emailSignInBtn.addEventListener('click', demoSignIn);
+    emailSignUpBtn.addEventListener('click', demoSignIn);
+    signOutBtn.addEventListener('click', () => setAuthState(false));
+    
+    // Chat listeners
+    sendBtn.addEventListener("click", handleSend);
     userInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend('text'); }
+        if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
     });
     userInput.addEventListener("input", () => {
         sendBtn.disabled = userInput.value.trim() === '' && !imageBase64;
     });
     
-    stopBtn.addEventListener('click', stopAudio);
+    // UI listeners
+    themeToggle.addEventListener('click', () => {
+        const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+        applyTheme(newTheme);
+    });
+    sidebarToggleBtn.addEventListener('click', () => appWrapper.classList.toggle('sidebar-open'));
+    sidebarOverlay.addEventListener('click', () => appWrapper.classList.remove('sidebar-open'));
+    languageSelectorButton.addEventListener('click', (e) => { e.stopPropagation(); languageDropdown.classList.toggle('hidden'); });
+    document.addEventListener('click', (e) => {
+        if (!languageSelectorButton.contains(e.target)) languageDropdown.classList.add('hidden');
+    });
+
+    // Sidebar listeners
+    newChatBtn.addEventListener('click', startNewChat);
+    chatSearchInput.addEventListener('input', (e) => renderChatHistoryList(e.target.value));
+    clearChatsBtn.addEventListener('click', clearAllChats);
+
+    // Image upload listeners
+    uploadBtn.addEventListener('click', () => imageUploadInput.click());
+    imageUploadInput.addEventListener('change', handleImageUpload);
+    removeImageBtn.addEventListener('click', removeImage);
+
+    // Settings Modal
     settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
     closeModalBtn.addEventListener('click', () => settingsModal.classList.add('hidden'));
     saveSettingsBtn.addEventListener('click', () => {
@@ -819,86 +580,6 @@
         settingsModal.classList.add('hidden');
     });
 
-    uploadBtn.addEventListener('click', () => imageUploadInput.click());
-    imageUploadInput.addEventListener('change', handleImageUpload);
-    removeImageBtn.addEventListener('click', removeImage);
-    
-    newChatBtn.addEventListener('click', () => {
-        startNewChat();
-        closeSidebarOnMobile();
-    });
-    clearChatsBtn.addEventListener('click', clearAllChats);
-    chatSearchInput.addEventListener('input', () => renderChatHistoryList(chatSearchInput.value));
-
-    chatBox.addEventListener('click', (e) => {
-        const copyBtn = e.target.closest('.copy-btn');
-        if (copyBtn) {
-            const textToCopy = document.querySelector(copyBtn.dataset.clipboardTarget).innerText;
-            const textArea = document.createElement("textarea");
-            textArea.value = textToCopy;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                copyBtn.innerHTML = '<svg class="w-4 h-4 text-green-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
-                setTimeout(() => { copyBtn.innerHTML = '<svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>'; }, 1500);
-            } catch (err) {
-                console.error('Failed to copy: ', err);
-            }
-            document.body.removeChild(textArea);
-        }
-    });
-    
-    themeToggle.addEventListener('click', () => {
-        const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-        localStorage.setItem('theme', newTheme);
-        applyTheme(newTheme);
-    });
-    
-    const populateLanguageDropdown = () => {
-        languageDropdown.innerHTML = '';
-        Array.from(languageSelector.options).forEach(option => {
-            const item = document.createElement('a');
-            item.href = '#';
-            item.textContent = option.textContent;
-            item.dataset.value = option.value;
-            item.className = 'block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-indigo-500 hover:text-white dark:hover:bg-indigo-500 transition-colors';
-            item.addEventListener('click', (e) => { e.preventDefault(); setLanguage(item.dataset.value); languageDropdown.classList.add('hidden'); });
-            languageDropdown.appendChild(item);
-        });
-    };
-
-    languageSelectorButton.addEventListener('click', (e) => { e.stopPropagation(); languageDropdown.classList.toggle('hidden'); });
-    document.addEventListener('click', (e) => {
-        if (!languageSelectorButton.contains(e.target) && !languageDropdown.contains(e.target)) {
-            languageDropdown.classList.add('hidden');
-        }
-    });
-        
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-    let isRecording = false;
-    if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        recognition.onstart = () => { isRecording = true; micBtn.classList.add('recording'); userInput.placeholder = uiStrings[languageSelector.value].listening; sendBtn.disabled = true; };
-        recognition.onresult = (event) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) { finalTranscript += event.results[i][0].transcript; }
-            }
-            userInput.value = finalTranscript;
-        };
-        recognition.onerror = (event) => { console.error("Speech recognition error:", event.error); addMessageToState(`Speech recognition error: ${event.error}`, 'bot', null, null, true); };
-        recognition.onend = () => { isRecording = false; micBtn.classList.remove('recording'); userInput.placeholder = uiStrings[languageSelector.value].placeholder; sendBtn.disabled = userInput.value.trim() === '' && !imageBase64; if (userInput.value.trim()) { handleSend('voice'); } };
-    } else {
-        micBtn.disabled = true;
-    }
-    micBtn.addEventListener('click', () => {
-        if (!SpeechRecognition) return;
-        if (isRecording) { recognition.stop(); } else { stopAudio(); recognition.lang = languageSelector.value; recognition.start(); }
-    });
 </script>
 </body>
 </html>
