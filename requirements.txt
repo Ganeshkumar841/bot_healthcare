@@ -10,3 +10,5 @@ edge-tts
 pdfplumber
 SpeechRecognition
 pydub
+Pillow
+firebase-admin
