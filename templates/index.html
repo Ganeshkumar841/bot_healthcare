@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light"> <!-- Default to light mode -->
+<html lang="en" class="light h-full"> <!-- Default to light mode, ADDED h-full -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,7 +78,7 @@
         }
     </style>
 </head>
-<body id="app-wrapper" class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 overflow-hidden">
+<body id="app-wrapper" class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 overflow-hidden h-full"> <!-- ADDED h-full -->
 
 <!-- Auth Container - Shown when logged out -->
 <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen py-10 px-4">
@@ -116,7 +116,8 @@
 </div>
 
 <!-- Main App Container (now a flex container) -->
-<div id="main-app-container" class="relative h-screen w-screen flex">
+<!-- CHANGED h-screen w-screen to h-full w-full -->
+<div id="main-app-container" class="relative h-full w-full flex">
     <!-- Sidebar -->
     <aside id="history-sidebar" class="bg-gray-50 dark:bg-gray-800 w-64 h-full flex flex-col fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out -translate-x-full border-r border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between p-3 h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -154,8 +155,10 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
     
     <!-- Main Content Area -->
-    <main id="main-content" class="flex-1 flex flex-col h-screen transition-all duration-300 ease-in-out">
-        <div id="chat-container" class="flex-1 flex flex-col h-full max-w-3xl mx-auto px-4 w-full">
+    <!-- CHANGED h-screen to h-full -->
+    <main id="main-content" class="flex-1 flex flex-col h-full transition-all duration-300 ease-in-out">
+        <!-- REMOVED h-full from this div, as flex-1 is sufficient -->
+        <div id="chat-container" class="flex-1 flex flex-col max-w-3xl mx-auto px-4 w-full">
             <!-- 
                 ========================================================================
                 HEADER LAYOUT FIX:
@@ -197,7 +200,7 @@
                              <option value="ta-IN">தமிழ்</option>
                              <option value="or-IN">ଓଡିଆ</option>
                              <option value="bn-IN">বাংলা</option>
-                             <option value="mr-IN">मराठी</option>
+                             <option value="mr-IN">మరాఠీ</option>
                              <option value="gu-IN">ગુજરાતી</option>
                              <option value="kn-IN">ಕನ್ನಡ</option>
                         </select>
@@ -359,11 +362,11 @@
         'de-DE': { title: "KI-Gesundheitsberater", subtitle: "Ihre freundliche KI-gestützte Gesundheitsressource", welcome: "<p>Willkommen. Ich bin Ihr KI-Gesundheitsberater. Fragen Sie mich alles über Symptome, Krankheiten, Fitness oder Ernährung.</p>", placeholder: "Fragen Sie nach einem Gesundheitsthema...", listening: "Höre zu... sprechen Sie jetzt." },
         'te-IN': { title: "ఆరోగ్యమిత్ర AI", subtitle: "మీ స్నేహపూర్వక AI- ఆధారిత ఆరోగ్య వనరు", welcome: "<p>స్వాగతం. నేను మీ AI ఆరోగ్య సలహాదారుని. లక్షణాలు, పరిస్థితులు, ఫిట్‌నెస్ లేదా పోషణ గురించి నన్ను ఏదైనా అడగండి.</p>", placeholder: "ఆరోగ్య అంశం గురించి అడగండి...", listening: "వినడం... ఇప్పుడు మాట్లాడండి." },
         'ta-IN': { title: "ஆரோக்கியமித்ரா AI", subtitle: "உங்கள் நட்பு AI- శక్తితో పనିచేசే சுகாதార వளம்", welcome: "<p>வாருங்கள். நான் உங்கள் AI சுகாதார ஆலோசகர். அறிகுறிகள், நிபந்தனைகள், உடற்பயிற்சி அல்லது ஊட்டச்சத்து பற்றி என்னிடம் எதுவும் கேளுங்கள்.</p>", placeholder: "ஒரு சுகாதார தலைப்பு பற்றி கேளுங்கள்...", listening: "கேட்கிறேன்... இப்போது பேசுங்கள்." },
-        'or-IN': { title: "ଆରୋଗ୍ଯମିତ୍ର AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାగତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" },
+        'or-IN': { title: "ଆରୋଗ୍ଯମିତ్ర AI", subtitle: "ଆପଣଙ୍କର ବନ୍ଧୁତ୍ୱପୂର୍ଣ୍ଣ AI- ଚାଳିତ ସ୍ୱାସ୍ଥ୍ୟ ସମ୍ବଳ |", welcome: "<p>ସ୍ୱାగତମ୍। ମୁଁ ଆପଣଙ୍କର AI ସ୍ୱାସ୍ଥ୍ୟ ପରାମର୍ଶଦାତା | ଲକ୍ଷଣ, ଅବସ୍ଥା, ଫିଟନେସ୍ କିମ୍ବା ପୁଷ୍ଟିକର ଖାଦ୍ୟ ବିଷୟରେ ମୋତେ କିଛି ପଚାରନ୍ତୁ |</p>", placeholder: "ଏକ ସ୍ୱାସ୍ଥ୍ୟ ବିଷୟରେ ପଚାରନ୍ତୁ ...", listening: "ଶୁଣୁଛି... ବର୍ତ୍ତମାନ କୁହ।" },
         'bn-IN': { title: "আরोग্যমিত্র AI", subtitle: "আপনার বন্ধুত্বপূর্ণ AI-চালিত স্বাস্থ্য সম্পদ", welcome: "<p>স্বাগত। আমি আপনার AI স্বাস্থ্য উপদেষ্টা। লক্ষণ, অবস্থা, ফিটনেস বা পুষ্টি সম্পর্কে আমাকে কিছু জিজ্ঞাসা করুন।</p>", placeholder: "একটি স্বাস্থ্য বিষয় সম্পর্কে জিজ্ঞাসা করুন...", listening: "শুনছি... এখন বলুন।" },
         'mr-IN': { title: "आरोग्यमित्र AI", subtitle: "तुमचे मैत्रीपूर्ण AI-चालित आरोग्य संसाधन", welcome: "<p>स्वागत आहे. मी तुमचा AI आरोग्य सल्लागार आहे. मला लक्षणे, परिस्थिती, फिटनेस किंवा पोषणाबद्दल काहीही विचारा.</p>", placeholder: "आरोग्य विषयाबद्दल विचारा...", listening: "ऐकत आहे... आता बोला." },
         'gu-IN': { title: "આરોગ્યમિત્ર AI", subtitle: "તમારું મૈત્રીપૂર્ણ AI-સંચાલित આરોગ્ય સંસાધન", welcome: "<p>સ્વાગત છે. હું તમારો AI આરોગ્ય સલાહકાર છું. મને લક્ષણો, પરિસ્થિતિઓ, ફિટનેસ અથવા પોષણ વિશે કંઈપણ પૂછો.</p>", placeholder: "આરોગ્ય વિષય વિશે પૂછો...", listening: "સાંભળી રહ્યો છું... હવે બોલો." },
-        'kn-IN': { title: "ಆರೋಗ್ಯಮಿತ್ರ AI", subtitle: "ನಿಮ್ಮ ಸ್ನೇಹಪರ AI-ಚಾಲಿತ ಆರೋಗ್ಯ ಸಂಪನ್ಮೂಲ", welcome: "<p>ಸ್ವಾಗತ. ನಾನು ನಿಮ್ಮ AI ಆರೋಗ್ಯ ಸಲಹೆಗಾರ. ರೋಗಲಕ್ಷಣಗಳು, ಪರಿಸ್ಥಿತಿಗಳು, ಫಿಟ್ನೆಸ್ ಅಥವಾ ಪೋಷಣೆಯ ಬಗ್ಗೆ ನನ್ನನ್ನು ಏನು ಬೇಕಾದರೂ ಕೇಳಿ.</p>", placeholder: "ಆರೋಗ್ಯ ವಿಷಯದ ಬಗ್ಗೆ ಕೇಳಿ...", listening: "ಕೇಳುತ್ತಿದೆ... ಈಗ ಮಾತನಾಡಿ." }
+        'kn-IN': { title: "ಆರೋಗ್ಯಮಿತ್ರ AI", subtitle: "ನಿಮ್ಮ ಸ್ನೇಹಪರ AI-ಚಾಲಿತ ಆರೋಗ್ಯ ಸಂಪನ್ಮೂಲ", welcome: "<p>ಸ್ವಾಗತ. ನಾನು ನಿಮ್ಮ AI ಆರೋಗ್ಯ ಸಲಹೆಗಾರ. ರೋಗಲಕ್ಷಣಗಳು, ಪರಿಸ್થಿತಿಗಳು, ಫಿಟ್ನೆಸ್ ಅಥವಾ ಪೋಷಣೆಯ ಬಗ್ಗೆ ನನ್ನನ್ನು ಏನು ಬೇಕಾದರೂ ಕೇಳಿ.</p>", placeholder: "ಆರೋಗ್ಯ ವಿಷಯದ ಬಗ್ಗೆ ಕೇಳಿ...", listening: "ಕೇಳುತ್ತಿದೆ... ಈಗ ಮಾತನಾಡಿ." }
     };
 
     // ========================================================================
@@ -924,3 +927,4 @@
 </script>
 </body>
 </html>
+
