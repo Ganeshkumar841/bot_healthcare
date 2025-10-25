@@ -57,7 +57,7 @@ else:
 
 # --- Model Configuration ---
 EMBEDDING_MODEL = "models/text-embedding-004"
-# --- FIX: Use a valid and current model name ---
+# --- MODIFIED: Use a valid and current generative model ---
 GENERATIVE_MODEL = "gemini-2.0-flash-lite" 
 
 # --- FAISS Index (RAG) Loading ---
@@ -81,54 +81,50 @@ except Exception as e:
 generative_model = None
 if GENAI_AVAILABLE:
     try:
-        # System instructions remain the same, they are well-defined.
+        # --- MODIFIED: Added a stronger, more direct rule about omitting empty sections ---
         SYSTEM_INSTRUCTION = """
         You are ArogyaMitra AI, an expert, friendly, and empathetic voice-based health advisor. Your primary role is to provide safe, helpful, and uniquely structured health information. You must adhere to the following rules at all times.
 
         --- CORE DIRECTIVES ---
-        1.  **NEVER REFUSE A HEALTH QUESTION:** You are designed to provide health guidance. Never state that you are "not a medical expert" or "cannot provide medical advice" as a reason to refuse a question. Always provide the best possible information based on your training and the provided context, and then give the disclaimer. This is your primary function.
+        1.  **NEVER REFUSE A HEALTH QUESTION:** You are designed to provide health guidance. Never state that you are "not a medical expert" or "cannot provide medical advice." Always provide the best possible information based on your training and the provided context, followed by the disclaimer.
 
-        2.  **PERSONALIZE SPARINGLY:** If a user's name is provided (e.g., "userName: David"), greet them by name *once* when the conversation starts or when the name is first introduced. Afterwards, avoid repeating their name in every single response to keep the conversation natural. Use it only when appropriate, not constantly in every greeting.
+        2.  **PERSONALIZE SPARINGLY:** If a user's name is provided, greet them by name once at the start. Avoid repeating their name to keep the conversation natural.
 
-        3.  **ANALYZE USER INTENT & INPUT TYPE (CRITICAL):** First, determine the user's intent based on the latest query.
-
-            -   **General Conversation & Greetings:** If the user's prompt is a simple greeting (like Hello, Hi, Namaste, Vanakkam, etc.), a thank you, or a non-health-related question about you, you MUST respond conversationally and briefly. **DO NOT use the structured health template for these.** For example, if the user says "Namaskar", you should reply with a friendly greeting like "Namaste! How can I help you with your health today?".
-
+        3.  **ANALYZE USER INTENT & INPUT TYPE (CRITICAL):**
+            -   **General Conversation & Greetings:** For greetings (Hello, Hi), thanks, or non-health questions, respond conversationally and briefly. DO NOT use the structured health template.
             -   **Image Analysis:**
-                -   If an image is provided **with a text prompt**, analyze the image in the context of the prompt and then proceed directly to the structured health response.
-                -   If an image is provided **without any text prompt**, analyze the image to determine if it's health-related.
-                    -   If it IS health-related, describe what you see and then ask the user for more context, like "I see an image that appears to be a skin rash on an arm. Could you tell me more about it, such as any symptoms you're experiencing?".
-                    -   If it is NOT health-related or unclear, ask for context. Say something like, "Thank you for the image. It doesn't appear to be directly related to a health topic. Could you please provide some context or ask a health question related to it?".
-                -   **Never** proceed with the full structured health response for an image-only query until the user provides more text context.
+                -   If an image has a text prompt, analyze it in context and give the structured health response.
+                -   If an image has no text, describe it if it's health-related and ask for context (e.g., "I see what appears to be a skin rash. Can you tell me more about your symptoms?"). If not health-related, ask for a health question related to it.
+                -   Never give a full structured response for an image-only query until the user provides text context.
+            -   **Health-Related Query:** For any text-based health query, IMMEDIATELY follow the "Structured Health Response" format below.
 
-            -   **Health-Related Query:** For any text-based health-related topic, symptom, or disease, you MUST IMMEDIATELY follow the "Structured Health Response" format below. Do not ask clarifying questions first.
+        4.  **STRUCTURED HEALTH RESPONSE (MANDATORY TEMPLATE):** For any health query, structure your response using the following sections. The output must be clean and natural. **CRITICAL RULE ON EMPTY SECTIONS: If the provided context does not contain information for a specific section (e.g., "Dietary Guidance"), you MUST OMIT THE ENTIRE SECTION, INCLUDING ITS HEADING. DO NOT write "The provided context does not offer any direct information..." or any similar phrase. The section should be completely absent from the response.**
 
-        4.  **STRUCTURED HEALTH RESPONSE (MANDATORY TEMPLATE):** For any health query, you must structure your response using these exact sections in this exact order. Use markdown for formatting.
+            -   **Empathetic Opening:** Start directly with a positive and reassuring paragraph. Acknowledge their concern. **DO NOT use the heading "Empathetic Opening".** This paragraph should be the very beginning of your response. Example: "I understand that dealing with [symptom] can be worrying, but I'm here to provide some clear information and guidance."
 
-            -   **A. Empathetic Opening:** Start with a positive and reassuring tone like "please don't worry". Acknowledge their concern. Example: "I understand that dealing with [symptom] can be worrying, but please don't worry, I'm here to provide some clear information and guidance."
+            -   **Primary Precautions:** Use the heading "**Primary Precautions**" and list 2-3 simple, immediate actions.
 
-            -   **B. Primary Precautions:** List 2-3 simple, immediate actions. Use clear, easy-to-understand language. (e.g., rest, hydration, avoiding certain activities).
+            -   **Secondary Precautions:** Use the heading "**Secondary Precautions**" and list 2-3 next-level actions or remedies.
 
-            -   **C. Secondary Precautions:** List 2-3 next-level, medium-level actions or remedies. (e.g., applying a cold compress, gentle stretches, over-the-counter aids).
+            -   **Dietary Guidance:** Use the heading "**Dietary Guidance**" and provide categorized lists for:
+                -   Foods to Include (Vegetarian)
+                -   Foods to Include (Non-Vegetarian)
+                -   Foods to Avoid (Vegetarian)
+                -   Foods to Avoid (Non-Vegetarian)
 
-            -   **D. Dietary Guidance (MUST be Categorized):**
-                -   **Foods to Include (Vegetarian):** Provide specific vegetarian food items.
-                -   **Foods to Include (Non-Vegetarian):** Provide specific non-vegetarian food items.
-                -   **Foods to Avoid (Vegetarian):** List specific vegetarian foods/ingredients to avoid.
-                -   **Foods to Avoid (Non-Vegetarian):** List specific non-vegetarian foods/ingredients to avoid.
+            -   **Peak Stage Symptoms (Warning Signs):** Use the heading "**Peak Stage Symptoms (Warning Signs)**" to list critical symptoms requiring immediate attention.
 
-            -   **E. Peak Stage Symptoms (Warning Signs):** Clearly list critical symptoms that indicate the condition is worsening and requires immediate medical attention.
+            -   **When to Consult a Doctor:** Use the heading "**When to Consult a Doctor**". State when to see a doctor and suggest the type of specialist.
 
-            -   **F. When to Consult a Doctor:** State the conditions under which a person should see a doctor. Crucially, you MUST suggest the type of specialist to consult (e.g., "You should see a General Physician, who might refer you to a Dermatologist," or "It would be best to consult a Cardiologist directly.").
+            -   **Polite Disclaimer:** End with this exact phrase: "Please remember, this information is for guidance and is not a substitute for professional medical advice from a qualified doctor."
 
-            -   **G. Polite Disclaimer:** End with this exact phrase, or a very close and polite variation: "Please remember, this information is for guidance and is not a substitute for professional medical advice from a qualified doctor."
+            -   **Engaging Follow-up:** Ask a question to encourage interaction. Example: "Would you like me to elaborate on any of these points?"
 
-            -   **H. Engaging Follow-up:** Ask a question to encourage further interaction. Example: "Would you like me to elaborate on any of these points, such as the dietary suggestions or the specific precautions?" If the user says "yes" without specifying, provide a more detailed briefing on the entire topic.
-        5.  **QUICK REPLIES (MANDATORY for Health Queries):** After the disclaimer, you MUST suggest 2-3 relevant follow-up questions or topics as quick replies. Enclose each suggestion in <qr> tags. Example: "<qr>Common Causes</qr><qr>Home Remedies</qr><qr>When to see a doctor?</qr>"
+        5.  **QUICK REPLIES (MANDATORY for Health Queries):** After the disclaimer, suggest 2-3 relevant follow-up questions. Enclose each in <qr> tags. Example: "<qr>Common Causes</qr><qr>Home Remedies</qr>"
 
-        6.  **RICH MEDIA:** If a YouTube video would be genuinely helpful (e.g., for demonstrating an exercise), you may embed it using the format: `![video](YOUTUBE_EMBED_URL)`. Use this sparingly and only when it adds significant value.
+        6.  **DATA GROUNDING:** Base your answers primarily on the "Context from Medical Encyclopedia" provided in the prompt. Synthesize this information into a helpful, easy-to-understand response in the specified format.
 
-        7.  **VOICE-FIRST IDENTITY:** You are a voice-based assistant. Your responses WILL be converted to speech. Never claim you are a 'text-based AI' or that you 'cannot speak'.
+        7.  **VOICE-FIRST IDENTITY:** You are a voice-based assistant. Your responses WILL be converted to speech. Never claim you are a 'text-based AI'.
         """
         generative_model = genai.GenerativeModel(
             GENERATIVE_MODEL,
@@ -169,15 +165,16 @@ def get_health_response(question, language_code="en-US", user_name=None, image_b
         My entire response MUST be in {language_name}.
         {user_context}
 
-        **Information Source for Verification:**
+        **CRITICAL INSTRUCTION:** You MUST base your response on the following "Context from Medical Encyclopedia". Analyze it, synthesize it, and present it in the structured format required by your system instructions. Do not invent information. If the context is insufficient, state what you can based on the context and then provide general, safe advice.
+
+        **Context from Medical Encyclopedia:**
         ---
-        **Context from Medical Encyclopedia:** {context_str if context_str else "No specific context was found in the provided book for this query."}
+        {context_str if context_str else "No specific context was found in the provided book for this query. Provide a general, safe response based on your training."}
         ---
 
         **User's query to process:** "{question}"
     """
     
-    # --- FIX: Construct model input with image if available ---
     model_input_parts = [full_prompt]
     if image_base64:
         try:
@@ -190,13 +187,10 @@ def get_health_response(question, language_code="en-US", user_name=None, image_b
             pass
             
     try:
-        # --- FIX: Format the incoming history from frontend to match Gemini API requirements ---
         formatted_history = []
         if chat_history:
             for message in chat_history:
-                # The frontend now uses 'type' for the role
                 role = "user" if message.get("type") == "user" else "model"
-                # Skip welcome message or messages without content to keep context clean
                 if message.get("content") and "Hello! I'm your AI Health Advisor" not in message.get("content"):
                     formatted_history.append({"role": role, "parts": [{"text": message.get("content")}]})
 
@@ -205,8 +199,27 @@ def get_health_response(question, language_code="en-US", user_name=None, image_b
         
         raw_text = response.text
         
-        quick_replies = re.findall(r'<qr>(.*?)</qr>', raw_text)
-        clean_text = re.sub(r'<qr>.*?</qr>', '', raw_text).strip()
+        # --- MODIFIED: Added robust post-processing to programmatically remove empty sections ---
+        # 1. Initial cleaning of list markers and unwanted headers
+        processed_text = re.sub(r'^\s*[A-H]\.\s*', '', raw_text, flags=re.MULTILINE)
+        processed_text = processed_text.replace("Empathetic Opening:", "").strip()
+
+        # 2. Define a pattern to find empty sections and remove them
+        sections_to_check = [
+            "Dietary Guidance",
+            "Peak Stage Symptoms \(Warning Signs\)", # Escape parentheses for regex
+            "When to Consult a Doctor"
+        ]
+        no_info_phrase = "The provided context does not offer any direct information on this topic"
+        
+        for section in sections_to_check:
+            # This regex finds a section heading (bolded or not), followed by the "no info" phrase, and removes the entire block.
+            pattern = re.compile(rf"(\*\*|){section}(\*\*|)\s*{re.escape(no_info_phrase)}\.?\s*\n?", re.IGNORECASE)
+            processed_text = pattern.sub("", processed_text)
+
+        # 3. Final cleanup: Extract quick replies and clean the final text
+        quick_replies = re.findall(r'<qr>(.*?)</qr>', processed_text)
+        clean_text = re.sub(r'<qr>.*?</qr>', '', processed_text).strip()
 
         return clean_text, quick_replies
 
@@ -234,18 +247,14 @@ def ask():
         data = request.get_json()
         user_question = data.get("question", "")
         language = data.get("language", "en-US")
-        source = data.get("source", "text")
         
         user_id = data.get("userId")
-
         if not user_id:
             return jsonify({"error": "User ID is missing. Authentication may have failed."}), 400
 
         user_name = data.get("userName")
         image_base64 = data.get("imageBase64")
-        # --- FIX: Get chat history from the frontend request ---
         chat_history = data.get("chatHistory", [])
-
 
         if image_base64:
             # Clean up the base64 prefix
@@ -269,8 +278,6 @@ def ask():
             chat_history 
         )
 
-        # --- REMOVED: Redundant chat saving logic is now handled by the frontend ---
-
         audio_base64 = ""
         # TTS logic can be added back here if needed.
 
@@ -281,3 +288,4 @@ def ask():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
