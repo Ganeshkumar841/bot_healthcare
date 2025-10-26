@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" class="light h-full"> <!-- Default to light mode, ADDED h-full -->
+<!-- ADDED h-full -->
+<html lang="en" class="light h-full"> 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,7 +79,8 @@
         }
     </style>
 </head>
-<body id="app-wrapper" class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 overflow-hidden h-full"> <!-- ADDED h-full -->
+<!-- ADDED h-full and overflow-hidden -->
+<body id="app-wrapper" class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased transition-colors duration-300 h-full overflow-hidden"> 
 
 <!-- Auth Container - Shown when logged out -->
 <div id="auth-container" class="flex flex-col items-center justify-center min-h-screen py-10 px-4">
@@ -116,8 +118,8 @@
 </div>
 
 <!-- Main App Container (now a flex container) -->
-<!-- CHANGED h-screen w-screen to h-full w-full -->
-<div id="main-app-container" class="relative h-full w-full flex">
+<!-- Keep h-screen w-screen flex -->
+<div id="main-app-container" class="relative h-screen w-screen flex">
     <!-- Sidebar -->
     <aside id="history-sidebar" class="bg-gray-50 dark:bg-gray-800 w-64 h-full flex flex-col fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out -translate-x-full border-r border-gray-200 dark:border-gray-700">
         <div class="flex items-center justify-between p-3 h-16 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -155,10 +157,10 @@
     <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
     
     <!-- Main Content Area -->
-    <!-- CHANGED h-screen to h-full -->
-    <main id="main-content" class="flex-1 flex flex-col h-full transition-all duration-300 ease-in-out">
-        <!-- REMOVED h-full from this div, as flex-1 is sufficient -->
-        <div id="chat-container" class="flex-1 flex flex-col max-w-3xl mx-auto px-4 w-full">
+    <!-- ADDED overflow-hidden -->
+    <main id="main-content" class="flex-1 flex flex-col transition-all duration-300 ease-in-out overflow-hidden">
+        <!-- ADDED min-h-0 -->
+        <div id="chat-container" class="flex-1 flex flex-col max-w-3xl mx-auto px-4 w-full min-h-0">
             <!-- 
                 ========================================================================
                 HEADER LAYOUT FIX:
@@ -216,6 +218,7 @@
                 </div>
             </header>
 
+            <!-- The class "flex-1 overflow-y-auto pr-2 space-y-6" is correct -->
             <main id="chat-box" class="flex-1 overflow-y-auto pr-2 space-y-6"></main>
 
             <div id="quick-reply-box" class="py-2 flex items-center justify-center flex-wrap gap-2"></div>
@@ -927,4 +930,7 @@
 </script>
 </body>
 </html>
+
+
+
 
