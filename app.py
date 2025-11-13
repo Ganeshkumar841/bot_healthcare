@@ -58,6 +58,7 @@ else:
 # --- Model Configuration ---
 EMBEDDING_MODEL = "models/text-embedding-004"
 # --- MODIFIED: Use a valid and current generative model ---
+# Using "gemini-1.5-flash-latest" as it's a standard model that supports multimodal input
 GENERATIVE_MODEL = "gemini-2.5-flash-lite"
 
 
@@ -194,7 +195,14 @@ def get_health_response(question, language_code="en-US", user_name=None, image_b
             for message in chat_history:
                 role = "user" if message.get("type") == "user" else "model"
                 if message.get("content") and "Hello! I'm your AI Health Advisor" not in message.get("content"):
-                    formatted_history.append({"role": role, "parts": [{"text": message.get("content")}]})
+                    # Prepare parts for history, handling potential images
+                    history_parts = [{"text": message.get("content")}]
+                    
+                    # Note: The history format for images sent by the user is complex.
+                    # For now, we are only adding text history to avoid errors.
+                    # To fully support image history, you'd need to store and re-process image data.
+                    
+                    formatted_history.append({"role": role, "parts": history_parts})
 
         chat = generative_model.start_chat(history=formatted_history)
         response = chat.send_message(model_input_parts)
@@ -227,6 +235,7 @@ def get_health_response(question, language_code="en-US", user_name=None, image_b
 
     except Exception as e:
         print(f"An error occurred during content generation: {e}")
+        # This is the error message you are seeing
         return "An error occurred while trying to get a response from the AI model.", []
 
 # ==============================================================================
@@ -290,4 +299,3 @@ def ask():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
