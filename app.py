@@ -59,7 +59,7 @@ else:
 EMBEDDING_MODEL = "models/text-embedding-004"
 # --- MODIFIED: Use a valid and current generative model ---
 GENERATIVE_MODEL = "gemini-2.5-flash-lite"
-#need to change to the new model after some time
+
 
 
 # --- FAISS Index (RAG) Loading ---
