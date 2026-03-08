@@ -1,0 +1,7 @@
+# .vercelignore
+vosk/
+*.pdf
+*.txt
+*_index/
+venv/
+.venv/
