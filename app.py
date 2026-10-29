@@ -59,7 +59,8 @@ else:
 EMBEDDING_MODEL = "models/text-embedding-004"
 # --- MODIFIED: Use a valid and current generative model ---
 # Using "gemini-1.5-flash-latest" as it's a standard model that supports multimodal input
-GENERATIVE_MODEL = "gemini-2.5-flash-lite"
+# GENERATIVE_MODEL = "gemini-2.5-flash-lite"
+GENERATIVE_MODEL = "gemini-3.1-flash-lite"
 
 
 
